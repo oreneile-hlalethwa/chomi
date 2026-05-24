@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chomi – Home</title>
+  <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
+  <link rel="stylesheet" href="{% static 'enduser/css/home.css' %}" />
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="home-desktop-grid">
+    <div class="home-hero-col">
+
+      <span class="hero-pill">Your mental wellness companion</span>
+      <h1 class="hero-title">You deserve<br /><em>someone to talk to.</em></h1>
+      <p class="hero-sub">Chomi is a safe, private space to check in with yourself, track your moods, and find support — anytime.</p>
+      <div class="hero-cta">
+        <a href="/inbox/" class="btn-primary">Start chatting</a>
+        <a href="/support/" class="btn-ghost">Find support near me</a>
+      </div>
+      <p class="hero-note">Anonymous by default. No judgment. No pressure.</p>
+
+      <span class="section-tag">Daily check-in</span>
+      <div class="checkin-card">
+        <p class="checkin-label">How are you feeling today?</p>
+        <div class="mood-options">
+          <button class="mood-btn" data-mood="Calm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Calm</button>
+          <button class="mood-btn" data-mood="Low"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Low</button>
+          <button class="mood-btn" data-mood="Stressed"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="8" x2="9.01" y2="8"/><line x1="15" y1="8" x2="15.01" y2="8"/><path d="M8 4l2 2"/><path d="M16 4l-2 2"/></svg> Stressed</button>
+          <button class="mood-btn" data-mood="Good"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Good</button>
+          <button class="mood-btn" data-mood="Sad"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M12 17v1"/></svg> Sad</button>
+        </div>
+      </div>
+
+    </div><!-- end home-hero-col -->
+
+    <div class="home-cards-col">
+
+      <span class="section-tag">Your mood this week</span>
+      <div class="card">
+        <p class="card-title">Mood tracker</p>
+        <div class="mini-chart">
+          <div class="bar" style="height:8%"></div>
+          <div class="bar" style="height:8%"></div>
+          <div class="bar" style="height:8%"></div>
+          <div class="bar" style="height:8%"></div>
+          <div class="bar" style="height:8%"></div>
+          <div class="bar" style="height:8%"></div>
+          <div class="bar" style="height:8%"></div>
+        </div>
+        <div class="chart-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      </div>
+
+      <span class="section-tag">Mental health literacy</span>
+      <div class="literacy-list">
+        <div class="lit-card">
+          <div class="lit-icon c-pink"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <div><h4>Understanding anxiety</h4><p>Anxiety is your body's natural alarm system. Learn why it happens and how to manage it simply.</p></div>
+        </div>
+        <div class="lit-card">
+          <div class="lit-icon c-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div><h4>Coping with stress</h4><p>Practical, easy-to-follow techniques to calm your mind when life feels overwhelming.</p></div>
+        </div>
+        <div class="lit-card">
+          <div class="lit-icon c-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+          <div><h4>Depression explained</h4><p>What depression really is, what it isn't, and how to take the first step toward feeling better.</p></div>
+        </div>
+        <div class="lit-card">
+          <div class="lit-icon c-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div><h4>You are not alone</h4><p>Millions face mental health challenges. Here's how community and connection help heal.</p></div>
+        </div>
+      </div>
+
+    </div><!-- end home-cards-col -->
+  </div><!-- end home-desktop-grid -->
+</div>
+
+<script src="{% static 'enduser/js/nav.js' %}"></script>
+<script src="{% static 'enduser/js/home.js' %}"></script>
+</body>
+</html>

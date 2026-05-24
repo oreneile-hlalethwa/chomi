@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chomi – Wellness Reels</title>
+  <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
+  <link rel="stylesheet" href="{% static 'enduser/css/reels.css' %}" />
+</head>
+<body>
+
+<div class="page-wrap" style="padding-left:0;padding-right:0;max-width:100%;">
+  <div style="max-width:680px;margin:0 auto;padding:0 1.25rem;">
+    <h2 class="page-title">Wellness Reels</h2>
+  </div>
+  <div class="video-feed">
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="avatar c-green" style="width:36px;height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+        <div><p class="vid-ch">MindfulSA</p><p class="vid-sub">Mental Wellness</p></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="vid-thumb" style="background:linear-gradient(135deg,#c5e0d4,#2d7a5f);">
+        <div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      </div>
+      <p class="vid-title">5-minute breathing technique for instant calm</p>
+      <p class="vid-meta">124K views · 3 days ago</p>
+      <div class="vid-actions">
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 4.2K</button>
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 318</button>
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      </div>
+    </div>
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="avatar c-purple" style="width:36px;height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div><p class="vid-ch">TherapyTalks</p><p class="vid-sub">Professional Advice</p></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="vid-thumb" style="background:linear-gradient(135deg,#c8dfd6,#4a9e7e);">
+        <div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      </div>
+      <p class="vid-title">Signs you might be experiencing burnout (and what to do)</p>
+      <p class="vid-meta">89K views · 1 week ago</p>
+      <div class="vid-actions">
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 3.1K</button>
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 247</button>
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      </div>
+    </div>
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="avatar c-pink" style="width:36px;height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div><p class="vid-ch">HealingSpaceSA</p><p class="vid-sub">Community Stories</p></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="vid-thumb" style="background:linear-gradient(135deg,#e8f3ee,#e8b96a);">
+        <div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      </div>
+      <p class="vid-title">My journey through depression — a real story from Joburg</p>
+      <p class="vid-meta">201K views · 2 weeks ago</p>
+      <div class="vid-actions">
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 9.8K</button>
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 1.2K</button>
+        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'enduser/js/nav.js' %}"></script>
+<script src="{% static 'enduser/js/reels.js' %}"></script>
+</body>
+</html>

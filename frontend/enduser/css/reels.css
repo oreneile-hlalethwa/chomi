@@ -1,0 +1,17 @@
+/* ===== REELS PAGE ===== */
+.video-feed { max-width: 680px; margin: 0 auto; }
+.vid-card { border-bottom: 1px solid var(--border); padding: 1.25rem; }
+.vid-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.vid-ch { font-size: 0.86rem; font-weight: 500; }
+.vid-sub { font-size: 0.7rem; color: var(--text-muted); }
+.follow-btn { margin-left: auto; font-size: 0.75rem; color: var(--accent); font-weight: 500; border: 1px solid var(--accent); padding: 0.22rem 0.7rem; border-radius: 100px; background: none; cursor: pointer; transition: background 0.2s, color 0.2s; font-family: var(--font-body); }
+.follow-btn:hover, .follow-btn.following { background: var(--accent); color: #fff; }
+.vid-thumb { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; position: relative; overflow: hidden; cursor: pointer; }
+.play-btn { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center; position: absolute; z-index: 1; box-shadow: 0 4px 14px rgba(0,0,0,0.15); transition: transform 0.2s; }
+.vid-thumb:hover .play-btn { transform: scale(1.08); }
+.vid-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+.vid-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.8rem; }
+.vid-actions { display: flex; gap: 1.25rem; }
+.vid-action { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s; font-family: var(--font-body); }
+.vid-action:hover { color: var(--accent); }
+.vid-action.liked { color: var(--accent); }

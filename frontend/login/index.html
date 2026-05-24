@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chomi – Get Started</title>
+  <link rel="stylesheet" href="{% static 'login/css/login.css' %}" />
+</head>
+<body>
+
+<!-- ══ SPLASH ══ -->
+<div id="splash">
+  <div class="splash-inner">
+    <h1 class="splash-title">chomi<span class="gold">.</span></h1>
+    <p class="splash-sub">Healthy life is having a healthy mind, so build a healthy mind then the healthy body.</p>
+    <button class="get-started-btn" onclick="startLoading()">Get Started</button>
+    <span class="terms-link">Terms and conditions</span>
+  </div>
+</div>
+
+<!-- ══ LOADING ══ -->
+<div id="loading">
+  <div class="loading-logo">chomi<span>.</span></div>
+  <div class="progress-track">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <p class="loading-text">Setting things up...</p>
+</div>
+
+<!-- ══ AUTH ══ -->
+<div id="auth" {% if show_auth %}class="visible"{% endif %}>
+
+  <!-- Desktop only: left green branding panel -->
+  <div class="auth-side-panel">
+    <div class="side-panel-inner">
+      <div class="side-logo">chomi<span>.</span></div>
+      <h2 class="side-title">Your mental wellness companion</h2>
+      <p class="side-sub">A safe, private space to check in with yourself, track your moods, and find support — anytime.</p>
+      <ul class="side-features">
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Anonymous by default
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Private &amp; secure
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Find support near you
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Works offline
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right: form area -->
+  <div class="auth-form-area">
+
+    <!-- Mobile top band (hidden on desktop) -->
+    <div class="auth-top">
+      <div class="auth-logo">chomi<span>.</span></div>
+      <div class="auth-tabs" id="mobileTabBar">
+        <button class="auth-tab {% if active_tab == 'signup' %}{% else %}active{% endif %}" onclick="switchTab('signin')">Sign In</button>
+        <button class="auth-tab {% if active_tab == 'signup' %}active{% endif %}" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+    </div>
+
+    <div class="auth-card">
+
+      <!-- Desktop tab switcher inside card (hidden on mobile) -->
+      <div class="desktop-tabs" id="desktopTabBar">
+        <button class="auth-tab {% if active_tab == 'signup' %}{% else %}active{% endif %}" onclick="switchTab('signin')">Sign In</button>
+        <button class="auth-tab {% if active_tab == 'signup' %}active{% endif %}" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- Error messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert-msg {% if message.tags %}{{ message.tags }}{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- SIGN IN -->
+      <div class="auth-form {% if active_tab == 'signup' %}{% else %}active{% endif %}" id="form-signin">
+        <h2 class="form-title">Welcome back</h2>
+        <p class="form-sub">Sign in to continue your wellness journey.</p>
+
+        <form method="POST" action="/login-submit/">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <input class="form-input" type="email" name="email" placeholder="lerato@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="pw-wrap">
+              <input class="form-input" type="password" name="password" id="signinPw" placeholder="Enter your password" required />
+              <span class="pw-eye" onclick="togglePw('signinPw', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="save-row">
+            <label class="save-check">
+              <input type="checkbox" /> Save password
+            </label>
+            <a class="forgot-link" onclick="showForgot()">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="submit-btn">Sign In</button>
+        </form>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="auth-form {% if active_tab == 'signup' %}active{% endif %}" id="form-signup">
+        <h2 class="form-title">Create account</h2>
+        <p class="form-sub">Join Chomi and start your wellness journey today.</p>
+
+        <form method="POST" action="/signup/">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First name</label>
+              <input class="form-input" type="text" name="first_name" placeholder="Lerato" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last name</label>
+              <input class="form-input" type="text" name="last_name" placeholder="Zungu" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <input class="form-input" type="email" name="email" placeholder="lerato@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone number</label>
+            <input class="form-input" type="tel" name="phone_number" placeholder="+27 71 234 5678" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select class="form-select" name="gender">
+              <option value="" disabled selected>Select gender</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="non_binary">Non-binary</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="pw-wrap">
+              <input class="form-input" type="password" name="password" id="signupPw" placeholder="Create a password" required />
+              <span class="pw-eye" onclick="togglePw('signupPw', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm password</label>
+            <div class="pw-wrap">
+              <input class="form-input" type="password" name="confirm_password" id="confirmPw" placeholder="Repeat your password" required />
+              <span class="pw-eye" onclick="togglePw('confirmPw', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ FORGOT PASSWORD SHEET ══ -->
+<div id="forgotOverlay" onclick="hideForgot(event)">
+  <div class="forgot-sheet" style="position:relative;">
+    <span class="close-sheet" onclick="hideForgot(null, true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </span>
+    <h3>Reset password</h3>
+    <p>Enter your email and we'll send you a link to reset your password.</p>
+    <form method="POST" action="/forgot-password/">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" name="email" placeholder="lerato@example.com" required />
+      </div>
+      <button type="submit" class="submit-btn" style="margin-top:0.5rem;">Send Reset Link</button>
+    </form>
+  </div>
+</div>
+
+<script src="{% static 'login/js/login.js' %}"></script>
+
+<script>
+  // Auto show auth panel if there are errors or active_tab is set
+  {% if show_auth %}
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('auth').classList.add('visible');
+    {% if active_tab == 'signup' %}
+    switchTab('signup');
+    {% endif %}
+  });
+  {% endif %}
+</script>
+
+<style>
+  .alert-msg {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    margin-bottom: 1rem;
+    background: #fdf0ee;
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
+  .alert-msg.success {
+    background: #e4f2ec;
+    color: #2d7a5f;
+    border-color: rgba(45,122,95,0.2);
+  }
+</style>
+</body>
+</html>

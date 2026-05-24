@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chomi – Inbox</title>
+  <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
+  <link rel="stylesheet" href="{% static 'enduser/css/inbox.css' %}" />
+</head>
+<body>
+
+<div class="page-wrap" style="padding:0;max-width:100%;">
+  <div class="inbox-layout">
+  <div class="chat-panel">
+    <h2 class="chat-panel-title">Inbox</h2>
+    <div class="chat-list">
+    <div class="chat-item">
+      <div class="avatar c-pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 11V7"/><circle cx="12" cy="5" r="2"/><path d="M8 15h.01M12 15h.01M16 15h.01"/></svg></div>
+      <div class="chat-info"><p class="chat-name">Chomi Assistant</p><p class="chat-preview">I'm here whenever you're ready to talk. How are you feeling?</p></div>
+      <div class="chat-meta"><span class="chat-time">Now</span><span class="badge">1</span></div>
+    </div>
+    <div class="chat-item">
+      <div class="avatar c-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.66z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.66z"/></svg></div>
+      <div class="chat-info"><p class="chat-name">Mental Health Coach</p><p class="chat-preview">Great progress this week! Your mood has been steadily improving.</p></div>
+      <div class="chat-meta"><span class="chat-time">2h ago</span></div>
+    </div>
+    <div class="chat-item">
+      <div class="avatar c-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="chat-info"><p class="chat-name">Support Group</p><p class="chat-preview">Lerato: "Thank you all for being so supportive today..."</p></div>
+      <div class="chat-meta"><span class="chat-time">Yesterday</span><span class="badge">3</span></div>
+    </div>
+    <div class="chat-item">
+      <div class="avatar c-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+      <div class="chat-info"><p class="chat-name">SADAG Helpline</p><p class="chat-preview">Our counsellors are available 24/7. Reach out anytime.</p></div>
+      <div class="chat-meta"><span class="chat-time">Mon</span></div>
+    </div>
+    <div class="chat-item">
+      <div class="avatar c-pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22V12"/><path d="M12 12C12 7 7 4 2 5c0 5 3 9 10 7"/><path d="M12 12c0-5 5-8 10-7-1 5-4 9-10 7"/></svg></div>
+      <div class="chat-info"><p class="chat-name">Daily Affirmations</p><p class="chat-preview">You are enough. You always have been. Today is a new day.</p></div>
+      <div class="chat-meta"><span class="chat-time">Sun</span></div>
+    </div>
+    </div><!-- end chat-list -->
+  </div><!-- end chat-panel -->
+  <div class="chat-window">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <p>Select a conversation to start chatting</p>
+  </div>
+  </div><!-- end inbox-layout -->
+</div>
+
+<button class="fab" title="New message">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<script src="{% static 'enduser/js/nav.js' %}"></script>
+<script src="{% static 'enduser/js/inbox.js' %}"></script>
+</body>
+</html>

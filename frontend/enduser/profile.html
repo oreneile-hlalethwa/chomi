@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chomi – Profile</title>
+  <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
+  <link rel="stylesheet" href="{% static 'enduser/css/profile.css' %}" />
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="profile-desktop-grid">
+  <div class="profile-left-col">
+  <div class="profile-head">
+    <div class="profile-avatar" id="profileAvatar">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <p class="profile-name" id="profileName">{{ user.get_full_name }}</p>
+      <p class="profile-sub" id="profileSub">Private mode · Identity hidden</p>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><p class="stat-num">7</p><p class="stat-lbl">Day streak</p></div>
+    <div class="stat-box"><p class="stat-num">24</p><p class="stat-lbl">Check-ins</p></div>
+    <div class="stat-box">
+      <p class="stat-num" style="display:flex;align-items:center;justify-content:center;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      </p>
+      <p class="stat-lbl">Top mood</p>
+    </div>
+  </div>
+
+  <span class="section-tag">Mood history — last 7 days</span>
+  <div class="card">
+    <div class="history-bars">
+      <div class="hbar good" style="height:65%"></div>
+      <div class="hbar calm" style="height:80%"></div>
+      <div class="hbar stressed" style="height:45%"></div>
+      <div class="hbar calm" style="height:70%"></div>
+      <div class="hbar good" style="height:90%"></div>
+      <div class="hbar good" style="height:85%"></div>
+      <div class="hbar calm" style="height:75%"></div>
+    </div>
+    <div class="chart-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+  </div>
+
+  </div><!-- end profile-left-col -->
+  <div class="profile-right-col">
+  <span class="section-tag">Identity</span>
+  <div class="anon-toggle-card">
+    <div class="anon-toggle-row">
+      <div>
+        <p class="anon-toggle-label">Anonymous mode</p>
+        <p class="anon-toggle-sub" id="anonSubText">Your identity is hidden from everyone</p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="anonToggle" checked />
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <span class="section-tag">Settings</span>
+  <div class="settings-list">
+    <div class="setting-item">
+      <div class="s-icon" style="background:var(--accent-soft);color:var(--accent);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <div><p class="s-label">Privacy & anonymity</p><p class="s-sub">Manage your data and privacy settings</p></div>
+      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div class="setting-item">
+      <div class="s-icon" style="background:var(--accent-2-soft);color:#2d7a5f;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+      <div><p class="s-label">Notifications</p><p class="s-sub">Daily check-in reminders & alerts</p></div>
+      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div class="setting-item">
+      <div class="s-icon" style="background:var(--purple-soft);color:var(--purple);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+      <div><p class="s-label">Appearance</p><p class="s-sub">Theme, font size, display options</p></div>
+      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div class="setting-item">
+      <div class="s-icon" style="background:#fdf0ee;color:#c0392b;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+      <div><p class="s-label">Clear my data</p><p class="s-sub">Delete all mood history and preferences</p></div>
+      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <a href="/logout/" class="setting-item" style="text-decoration:none;">
+  <div class="s-icon" style="background:#fdf0ee;color:#c0392b;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+  <div><p class="s-label">Sign out</p><p class="s-sub">Log out of your Chomi account</p></div>
+  <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+</a>
+  </div>
+  </div><!-- end profile-right-col -->
+  </div><!-- end profile-desktop-grid -->
+</div>
+
+<script src="{% static 'enduser/js/nav.js' %}"></script>
+<script src="{% static 'enduser/js/profile.js' %}"></script>
+
+<script>
+// Pass Django user data to profile.js
+const LOGGED_IN_USER = {
+  first: "{{ user.first_name }}",
+  last:  "{{ user.last_name }}",
+  email: "{{ user.email }}"
+};
+</script>
+</body>
+</html>

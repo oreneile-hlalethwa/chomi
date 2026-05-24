@@ -1,0 +1,44 @@
+/* ===== SUPPORT PAGE ===== */
+.sos-banner { background: linear-gradient(135deg,#c0392b,#a93226); border-radius: var(--radius); padding: 1.5rem; color: #fff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+.siren { animation: blink 1s ease-in-out infinite alternate; }
+@keyframes blink { from { opacity: 1; } to { opacity: 0.4; } }
+.sos-banner h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 300; margin-bottom: 0.25rem; }
+.sos-banner p { opacity: 0.85; font-size: 0.85rem; }
+.hotline-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.hotline-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.1rem; display: flex; align-items: center; gap: 0.85rem; transition: box-shadow 0.2s; }
+.hotline-card:hover { box-shadow: var(--shadow); }
+.h-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.h-red { background: #fdf0ee; color: #c0392b; }
+.h-orange { background: var(--accent-soft); color: var(--accent); }
+.h-green { background: var(--accent-2-soft); color: #2d7a5f; }
+.h-purple { background: var(--purple-soft); color: var(--purple); }
+.h-blue { background: #e8f0fb; color: #4a7ac8; }
+.hotline-info { flex: 1; }
+.hotline-name { font-size: 0.88rem; font-weight: 500; margin-bottom: 0.15rem; }
+.hotline-desc { font-size: 0.75rem; color: var(--text-muted); }
+.call-btn { background: var(--accent); color: #fff; padding: 0.38rem 0.9rem; border-radius: 100px; font-size: 0.78rem; font-weight: 500; white-space: nowrap; display: inline-block; transition: opacity 0.2s; }
+.call-btn:hover { opacity: 0.85; }
+.call-btn.red { background: #c0392b; }
+.nearby-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.nearby-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.1rem; display: flex; align-items: center; gap: 0.85rem; cursor: pointer; transition: box-shadow 0.2s; }
+.nearby-card:hover { box-shadow: var(--shadow); }
+.nearby-info { flex: 1; }
+.nearby-name { font-size: 0.88rem; font-weight: 500; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.nearby-addr { font-size: 0.75rem; color: var(--text-muted); }
+.open { font-size: 0.65rem; color: #2d7a5f; background: var(--accent-soft); padding: 0.18rem 0.55rem; border-radius: 100px; }
+.closed { font-size: 0.65rem; color: #c0392b; background: #fdf0ee; padding: 0.18rem 0.55rem; border-radius: 100px; }
+.dir-btn { color: var(--accent); display: flex; align-items: center; transition: transform 0.2s; }
+.dir-btn:hover { transform: translateX(3px); }
+
+
+/* SUPPORT — DESKTOP */
+@media (min-width: 768px) {
+  .support-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  .hotline-list { margin-bottom: 0; }
+  .nearby-list { margin-bottom: 0; }
+}
