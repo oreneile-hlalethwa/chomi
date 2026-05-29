@@ -105,3 +105,34 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f'{self.user.email} — {self.sender} — {self.timestamp}'
+    
+class Conversation(models.Model):
+    participants = models.ManyToManyField(User, related_name='conversations')
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f'Conversation {self.id}'
+
+    def get_last_message(self):
+        return self.messages.last()
+
+    def get_other_participant(self, user):
+        return self.participants.exclude(id=user.id).first()
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    content      = models.TextField()
+    read         = models.BooleanField(default=False)
+    timestamp    = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f'{self.sender.email}: {self.content[:50]}'

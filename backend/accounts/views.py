@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import User, MoodCheckIn, LiteracyRecommendation, ChatMessage
+from .models import User, MoodCheckIn, LiteracyRecommendation, ChatMessage, Conversation, Message
 from .claude_service import (
     get_chips_for_mood, get_mood_followup,
     get_mood_response, detect_topics,
@@ -13,6 +13,7 @@ from .claude_service import (
 import json
 from datetime import timedelta
 from django.utils import timezone
+from django.db import models
 
 
 def login_view(request):
@@ -101,12 +102,6 @@ def home_view(request):
     return render(request, 'enduser/home.html', {
         'user': request.user,
     })
-
-
-@login_required(login_url='login')
-def inbox_view(request):
-    return render(request, 'enduser/inbox.html')
-
 
 @login_required(login_url='login')
 def reels_view(request):
@@ -291,3 +286,176 @@ def get_chat_history(request):
     )
     data = [{'sender': m.sender, 'message': m.message, 'time': m.timestamp.strftime('%H:%M')} for m in msgs]
     return JsonResponse({'messages': data})
+
+@login_required(login_url='login')
+def inbox_view(request):
+    return render(request, 'enduser/inbox.html', {
+        'user': request.user,
+    })
+
+@login_required(login_url='login')
+def search_users(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 1:
+        return JsonResponse({'users': []})
+    users = User.objects.filter(
+    is_active=True,
+    is_anonymous=False
+).filter(
+    models.Q(first_name__icontains=query) |
+    models.Q(last_name__icontains=query)
+).exclude(id=request.user.id)[:10]
+    data = []
+    for u in users:
+        data.append({
+            'id':         u.id,
+            'name':       'Anonymous' if u.is_anonymous else u.get_full_name(),
+            'initials':   ('AN' if u.is_anonymous else (u.first_name[0] + u.last_name[0]).upper()),
+            'is_anon':    u.is_anonymous,
+            'joined':     u.date_joined.strftime('%b %Y'),
+            'email':      '' if u.is_anonymous else u.email,
+        })
+    return JsonResponse({'users': data})
+
+@login_required(login_url='login')
+def get_conversations(request):
+    convos = request.user.conversations.prefetch_related('participants', 'messages').all()
+    data = []
+    for c in convos:
+        other    = c.get_other_participant(request.user)
+        last_msg = c.get_last_message()
+        if not other or not last_msg:
+            continue
+        unread = c.messages.filter(read=False).exclude(sender=request.user).count()
+        data.append({
+            'id':          c.id,
+            'other_id':    other.id,
+            'name':        'Anonymous' if other.is_anonymous else other.get_full_name(),
+            'initials':    'AN' if other.is_anonymous else (other.first_name[0] + other.last_name[0]).upper(),
+            'is_anon':     other.is_anonymous,
+            'last_msg':    last_msg.content[:60],
+            'time':        last_msg.timestamp.strftime('%H:%M'),
+            'unread':      unread,
+        })
+    return JsonResponse({'conversations': data})
+
+@login_required(login_url='login')
+def get_messages(request, conversation_id):
+    from django.shortcuts import get_object_or_404
+    convo = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    convo.messages.filter(read=False).exclude(sender=request.user).update(read=True)
+    msgs = convo.messages.all()
+    data = [{'sender_id': m.sender.id, 'content': m.content, 'time': m.timestamp.strftime('%H:%M'), 'is_me': m.sender == request.user} for m in msgs]
+    return JsonResponse({'messages': data})
+
+@login_required(login_url='login')
+@require_POST
+def send_message(request):
+    from django.shortcuts import get_object_or_404
+    data       = json.loads(request.body)
+    other_id   = data.get('other_id')
+    content    = data.get('content', '').strip()
+    convo_id   = data.get('conversation_id')
+
+    if not content:
+        return JsonResponse({'error': 'Empty message'}, status=400)
+
+    if convo_id:
+        convo = get_object_or_404(Conversation, id=convo_id, participants=request.user)
+    else:
+        other = get_object_or_404(User, id=other_id)
+        # Find existing or create new conversation
+        existing = request.user.conversations.filter(participants=other)
+        if existing.exists():
+            convo = existing.first()
+        else:
+            convo = Conversation.objects.create()
+            convo.participants.add(request.user, other)
+
+    Message.objects.create(conversation=convo, sender=request.user, content=content)
+    convo.save()
+
+    return JsonResponse({'conversation_id': convo.id, 'status': 'sent'})
+
+@login_required(login_url='login')
+def get_user_profile(request, user_id):
+    from django.shortcuts import get_object_or_404
+    u = get_object_or_404(User, id=user_id)
+    checkins = MoodCheckIn.objects.filter(user=u).count()
+    return JsonResponse({
+        'id':       u.id,
+        'name':     'Anonymous' if u.is_anonymous else u.get_full_name(),
+        'initials': 'AN' if u.is_anonymous else (u.first_name[0] + u.last_name[0]).upper(),
+        'is_anon':  u.is_anonymous,
+        'joined':   u.date_joined.strftime('%B %Y'),
+        'checkins': checkins,
+        'email':    '' if u.is_anonymous else u.email,
+    })
+
+@login_required(login_url='login')
+@require_POST
+def inbox_chomi_chat(request):
+    data         = json.loads(request.body)
+    user_message = data.get('message', '')
+    recent = MoodCheckIn.objects.filter(
+        user=request.user,
+        timestamp__gte=timezone.now() - timedelta(days=7)
+    ).values('mood', 'user_message')[:3]
+    history = [f"{r['mood']}: {r['user_message']}" for r in recent]
+    ai_response = get_mood_response('chat', '', user_message, request.user.first_name, history)
+    ChatMessage.objects.create(user=request.user, sender='user',  message=user_message)
+    ChatMessage.objects.create(user=request.user, sender='chomi', message=ai_response)
+    return JsonResponse({'response': ai_response})
+
+@login_required(login_url='login')
+@require_POST
+def toggle_anonymous(request):
+    data = json.loads(request.body)
+    is_anonymous = data.get('is_anonymous', True)
+    request.user.is_anonymous = is_anonymous
+    request.user.save()
+    return JsonResponse({'is_anonymous': request.user.is_anonymous})
+
+@login_required(login_url='login')
+@require_POST
+def update_profile(request):
+    data         = json.loads(request.body)
+    first_name   = data.get('first_name', '').strip()
+    last_name    = data.get('last_name', '').strip()
+    email        = data.get('email', '').strip()
+    phone_number = data.get('phone_number', '').strip()
+
+    if not first_name or not last_name or not email:
+        return JsonResponse({'error': 'First name, last name and email are required.'}, status=400)
+
+    if User.objects.filter(email=email).exclude(id=request.user.id).exists():
+        return JsonResponse({'error': 'That email is already in use.'}, status=400)
+
+    request.user.first_name   = first_name
+    request.user.last_name    = last_name
+    request.user.email        = email
+    request.user.phone_number = phone_number
+    request.user.save()
+    return JsonResponse({'status': 'ok'})
+
+
+@login_required(login_url='login')
+@require_POST
+def clear_data(request):
+    data        = json.loads(request.body)
+    clear_mood  = data.get('clear_mood', False)
+    clear_chats = data.get('clear_chats', False)
+    convo_ids   = data.get('convo_ids', [])
+
+    if clear_mood:
+        MoodCheckIn.objects.filter(user=request.user).delete()
+        LiteracyRecommendation.objects.filter(user=request.user).delete()
+        ChatMessage.objects.filter(user=request.user).delete()
+
+    if clear_chats and convo_ids:
+        convos = Conversation.objects.filter(id__in=convo_ids, participants=request.user)
+        for convo in convos:
+            convo.messages.all().delete()
+            convo.delete()
+
+    return JsonResponse({'status': 'ok'})
