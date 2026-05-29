@@ -12,99 +12,209 @@
 
 <div class="page-wrap">
   <div class="profile-desktop-grid">
-  <div class="profile-left-col">
-  <div class="profile-head">
-    <div class="profile-avatar" id="profileAvatar">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </div>
-    <div>
-      <p class="profile-name" id="profileName">{{ user.get_full_name }}</p>
-      <p class="profile-sub" id="profileSub">Private mode · Identity hidden</p>
-    </div>
-  </div>
 
-  <div class="stats-row">
-    <div class="stat-box"><p class="stat-num">7</p><p class="stat-lbl">Day streak</p></div>
-    <div class="stat-box"><p class="stat-num">24</p><p class="stat-lbl">Check-ins</p></div>
-    <div class="stat-box">
-      <p class="stat-num" style="display:flex;align-items:center;justify-content:center;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-      </p>
-      <p class="stat-lbl">Top mood</p>
-    </div>
-  </div>
-
-  <span class="section-tag">Mood history — last 7 days</span>
-  <div class="card">
-    <div class="history-bars">
-      <div class="hbar good" style="height:65%"></div>
-      <div class="hbar calm" style="height:80%"></div>
-      <div class="hbar stressed" style="height:45%"></div>
-      <div class="hbar calm" style="height:70%"></div>
-      <div class="hbar good" style="height:90%"></div>
-      <div class="hbar good" style="height:85%"></div>
-      <div class="hbar calm" style="height:75%"></div>
-    </div>
-    <div class="chart-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
-  </div>
-
-  </div><!-- end profile-left-col -->
-  <div class="profile-right-col">
-  <span class="section-tag">Identity</span>
-  <div class="anon-toggle-card">
-    <div class="anon-toggle-row">
-      <div>
-        <p class="anon-toggle-label">Anonymous mode</p>
-        <p class="anon-toggle-sub" id="anonSubText">Your identity is hidden from everyone</p>
+    <!-- LEFT COL -->
+    <div class="profile-left-col">
+      <div class="profile-head">
+        <div class="profile-avatar" id="profileAvatar">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <p class="profile-name" id="profileName">{{ user.get_full_name }}</p>
+          <p class="profile-sub" id="profileSub">Private mode · Identity hidden</p>
+        </div>
       </div>
-      <label class="toggle-switch">
-        <input type="checkbox" id="anonToggle" checked />
-        <span class="toggle-track"></span>
-      </label>
+
+      <div class="stats-row">
+        <div class="stat-box"><p class="stat-num" id="statStreak">—</p><p class="stat-lbl">Day streak</p></div>
+        <div class="stat-box"><p class="stat-num" id="statCheckins">—</p><p class="stat-lbl">Check-ins</p></div>
+        <div class="stat-box">
+          <p class="stat-num" id="statMood" style="display:flex;align-items:center;justify-content:center;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </p>
+          <p class="stat-lbl">Top mood</p>
+        </div>
+      </div>
+
+      <span class="section-tag">Mood history — last 7 days</span>
+      <div class="card">
+        <div class="history-bars" id="historyBars">
+          <div class="hbar calm" style="height:8%"></div>
+          <div class="hbar calm" style="height:8%"></div>
+          <div class="hbar calm" style="height:8%"></div>
+          <div class="hbar calm" style="height:8%"></div>
+          <div class="hbar calm" style="height:8%"></div>
+          <div class="hbar calm" style="height:8%"></div>
+          <div class="hbar calm" style="height:8%"></div>
+        </div>
+        <div class="chart-days" id="chartDays">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
     </div>
+
+    <!-- RIGHT COL -->
+    <div class="profile-right-col">
+      <span class="section-tag">Identity</span>
+      <div class="anon-toggle-card">
+        <div class="anon-toggle-row">
+          <div>
+            <p class="anon-toggle-label">Anonymous mode</p>
+            <p class="anon-toggle-sub" id="anonSubText">Your identity is hidden from everyone</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="anonToggle" checked />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <span class="section-tag">Settings</span>
+      <div class="settings-list">
+        <div class="setting-item" onclick="openSheet('notifSheet')">
+          <div class="s-icon" style="background:var(--accent-soft);color:var(--accent);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div><p class="s-label">Notifications</p><p class="s-sub">Messages and alerts</p></div>
+          <span class="s-badge" id="notifBadge" style="display:none"></span>
+          <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="setting-item" onclick="openSheet('privacySheet')">
+          <div class="s-icon" style="background:var(--accent-soft);color:var(--accent);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div><p class="s-label">Privacy &amp; anonymity</p><p class="s-sub">Edit your name, email and phone</p></div>
+          <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="setting-item" onclick="openSheet('clearSheet')">
+          <div class="s-icon" style="background:#fdf0ee;color:#c0392b;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </div>
+          <div><p class="s-label">Clear my data</p><p class="s-sub">Delete mood history or chat messages</p></div>
+          <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <a href="/logout/" class="setting-item" style="text-decoration:none;">
+          <div class="s-icon" style="background:#fdf0ee;color:#c0392b;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </div>
+          <div><p class="s-label">Sign out</p><p class="s-sub">Log out of your Chomi account</p></div>
+          <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── OVERLAY ── -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeAllSheets()"></div>
+
+<!-- ── NOTIFICATIONS SHEET ── -->
+<div class="bottom-sheet" id="notifSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <p class="sheet-title">Notifications</p>
+    <button class="sheet-close" onclick="closeAllSheets()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div id="notifList" class="sheet-body">
+    <p style="font-size:0.82rem;color:var(--text-muted);text-align:center;padding:1rem 0">Loading...</p>
+  </div>
+</div>
+
+<!-- ── PRIVACY SHEET ── -->
+<div class="bottom-sheet" id="privacySheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <p class="sheet-title">Edit Profile</p>
+    <button class="sheet-close" onclick="closeAllSheets()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="sheet-body">
+    <div class="field-group">
+      <label class="field-label">First name</label>
+      <input class="field-input" id="editFirst" type="text" placeholder="First name" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Last name</label>
+      <input class="field-input" id="editLast" type="text" placeholder="Last name" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Email address</label>
+      <input class="field-input" id="editEmail" type="email" placeholder="Email address" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">Phone number</label>
+      <input class="field-input" id="editPhone" type="tel" placeholder="Phone number" />
+    </div>
+    <p class="field-note" id="privacyMsg"></p>
+    <button class="sheet-btn" onclick="saveProfile()">Save changes</button>
+  </div>
+</div>
+
+<!-- ── CLEAR DATA SHEET ── -->
+<div class="bottom-sheet" id="clearSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <p class="sheet-title">Clear my data</p>
+    <button class="sheet-close" onclick="closeAllSheets()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   </div>
 
-  <span class="section-tag">Settings</span>
-  <div class="settings-list">
-    <div class="setting-item">
-      <div class="s-icon" style="background:var(--accent-soft);color:var(--accent);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-      <div><p class="s-label">Privacy & anonymity</p><p class="s-sub">Manage your data and privacy settings</p></div>
-      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+  <!-- Step 1 — choose what to delete -->
+  <div class="sheet-body" id="clearStep1">
+    <p class="sheet-desc">Choose what you want to delete. This cannot be undone.</p>
+    <label class="check-row">
+      <input type="checkbox" id="clearMood" />
+      <div>
+        <p class="check-label">Mood check-ins</p>
+        <p class="check-sub">All your daily mood logs and AI responses</p>
+      </div>
+    </label>
+    <label class="check-row" id="clearChatRow">
+      <input type="checkbox" id="clearChats" onchange="toggleConvoList()" />
+      <div>
+        <p class="check-label">Chat messages</p>
+        <p class="check-sub">Choose which conversations to delete</p>
+      </div>
+    </label>
+    <!-- Conversation list (shown when chat messages is ticked) -->
+    <div class="convo-select" id="convoSelect" style="display:none">
+      <label class="check-row sub-check">
+        <input type="checkbox" id="selectAllConvos" onchange="toggleAllConvos()" />
+        <div><p class="check-label">Select all conversations</p></div>
+      </label>
+      <div id="convoList"></div>
     </div>
-    <div class="setting-item">
-      <div class="s-icon" style="background:var(--accent-2-soft);color:#2d7a5f;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-      <div><p class="s-label">Notifications</p><p class="s-sub">Daily check-in reminders & alerts</p></div>
-      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-    </div>
-    <div class="setting-item">
-      <div class="s-icon" style="background:var(--purple-soft);color:var(--purple);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
-      <div><p class="s-label">Appearance</p><p class="s-sub">Theme, font size, display options</p></div>
-      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-    </div>
-    <div class="setting-item">
-      <div class="s-icon" style="background:#fdf0ee;color:#c0392b;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
-      <div><p class="s-label">Clear my data</p><p class="s-sub">Delete all mood history and preferences</p></div>
-      <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-    </div>
-    <a href="/logout/" class="setting-item" style="text-decoration:none;">
-  <div class="s-icon" style="background:#fdf0ee;color:#c0392b;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-  <div><p class="s-label">Sign out</p><p class="s-sub">Log out of your Chomi account</p></div>
-  <div class="s-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-</a>
+    <button class="sheet-btn danger" onclick="showClearConfirm()">Continue</button>
   </div>
-  </div><!-- end profile-right-col -->
-  </div><!-- end profile-desktop-grid -->
+
+  <!-- Step 2 — confirmation -->
+  <div class="sheet-body" id="clearStep2" style="display:none">
+    <div class="confirm-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <p class="confirm-title">Are you sure?</p>
+    <p class="confirm-desc" id="confirmDesc"></p>
+    <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+      <button class="sheet-btn ghost" onclick="showClearStep1()">Go back</button>
+      <button class="sheet-btn danger" id="confirmDeleteBtn" onclick="executeDelete()">Yes, delete</button>
+    </div>
+  </div>
 </div>
 
 <script src="{% static 'enduser/js/nav.js' %}"></script>
 <script src="{% static 'enduser/js/profile.js' %}"></script>
-
 <script>
-// Pass Django user data to profile.js
 const LOGGED_IN_USER = {
-  first: "{{ user.first_name }}",
-  last:  "{{ user.last_name }}",
-  email: "{{ user.email }}"
+  first:        "{{ user.first_name }}",
+  last:         "{{ user.last_name }}",
+  email:        "{{ user.email }}",
+  phone:        "{{ user.phone_number }}",
+  is_anonymous: {{ user.is_anonymous|lower }}
 };
 </script>
 </body>

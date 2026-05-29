@@ -12,48 +12,172 @@
 
 <div class="page-wrap" style="padding:0;max-width:100%;">
   <div class="inbox-layout">
-  <div class="chat-panel">
-    <h2 class="chat-panel-title">Inbox</h2>
-    <div class="chat-list">
-    <div class="chat-item">
-      <div class="avatar c-pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 11V7"/><circle cx="12" cy="5" r="2"/><path d="M8 15h.01M12 15h.01M16 15h.01"/></svg></div>
-      <div class="chat-info"><p class="chat-name">Chomi Assistant</p><p class="chat-preview">I'm here whenever you're ready to talk. How are you feeling?</p></div>
-      <div class="chat-meta"><span class="chat-time">Now</span><span class="badge">1</span></div>
-    </div>
-    <div class="chat-item">
-      <div class="avatar c-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.66z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.66z"/></svg></div>
-      <div class="chat-info"><p class="chat-name">Mental Health Coach</p><p class="chat-preview">Great progress this week! Your mood has been steadily improving.</p></div>
-      <div class="chat-meta"><span class="chat-time">2h ago</span></div>
-    </div>
-    <div class="chat-item">
-      <div class="avatar c-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <div class="chat-info"><p class="chat-name">Support Group</p><p class="chat-preview">Lerato: "Thank you all for being so supportive today..."</p></div>
-      <div class="chat-meta"><span class="chat-time">Yesterday</span><span class="badge">3</span></div>
-    </div>
-    <div class="chat-item">
-      <div class="avatar c-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
-      <div class="chat-info"><p class="chat-name">SADAG Helpline</p><p class="chat-preview">Our counsellors are available 24/7. Reach out anytime.</p></div>
-      <div class="chat-meta"><span class="chat-time">Mon</span></div>
-    </div>
-    <div class="chat-item">
-      <div class="avatar c-pink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22V12"/><path d="M12 12C12 7 7 4 2 5c0 5 3 9 10 7"/><path d="M12 12c0-5 5-8 10-7-1 5-4 9-10 7"/></svg></div>
-      <div class="chat-info"><p class="chat-name">Daily Affirmations</p><p class="chat-preview">You are enough. You always have been. Today is a new day.</p></div>
-      <div class="chat-meta"><span class="chat-time">Sun</span></div>
-    </div>
-    </div><!-- end chat-list -->
-  </div><!-- end chat-panel -->
-  <div class="chat-window">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <p>Select a conversation to start chatting</p>
-  </div>
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="chat-panel">
+      <div class="chat-panel-header">
+        <h2 class="chat-panel-title">Inbox</h2>
+        <!-- Search bar -->
+        <div class="inbox-search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="inbox-search" id="inboxSearch" type="text" placeholder="Search people..." autocomplete="off" />
+          <button class="inbox-search-clear" id="searchClear" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search results (hidden by default) -->
+      <div class="search-results" id="searchResults" style="display:none">
+        <p class="search-results-label">People</p>
+        <div id="searchList"></div>
+      </div>
+
+      <!-- Conversations list -->
+      <div class="chat-list" id="chatList">
+        <!-- Chomi Assistant always pinned — now opens voice -->
+        <div class="chat-item pinned" id="chomiItem" onclick="openChomiVoice()">
+          <div class="avatar c-pink">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 11V7"/><circle cx="12" cy="5" r="2"/><path d="M8 15h.01M12 15h.01M16 15h.01"/></svg>
+          </div>
+          <div class="chat-info">
+            <p class="chat-name">Chomi Assistant <span class="pinned-tag">AI</span></p>
+            <p class="chat-preview" id="chomiPreview">Tap to start talking with Chomi</p>
+          </div>
+          <div class="chat-meta">
+            <span class="chat-time">Voice</span>
+          </div>
+        </div>
+        <!-- User conversations loaded here -->
+        <div id="userConvos"></div>
+      </div>
+    </div><!-- end chat-panel -->
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="chat-window" id="chatWindow">
+
+      <!-- Empty state (unchanged) -->
+      <div class="chat-window-empty" id="chatEmpty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <p>Select a conversation to start chatting</p>
+      </div>
+
+      <!-- ══ VOICE PANEL — Chomi Assistant ══ -->
+      <div class="voice-panel" id="voicePanel" style="display:none">
+        <!-- Header -->
+        <div class="voice-header">
+          <button class="chat-back-btn" onclick="closeVoice()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <p class="voice-header-title">Chomi Assistant</p>
+          <span class="voice-header-badge">Voice AI</span>
+        </div>
+
+        <!-- Bot + speech bubble -->
+        <div class="voice-body">
+          <div class="bot-stage">
+            <svg class="bot-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <g id="botBody">
+                <line x1="100" y1="30" x2="100" y2="14" stroke="#5F5E5A" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="100" cy="10" r="5" fill="#2C2C2A"/>
+                <rect x="50" y="30" width="100" height="78" rx="22" fill="#E8EEF5" stroke="#B5C2D1" stroke-width="1"/>
+                <circle cx="48" cy="68" r="7" fill="#2C2C2A"/>
+                <circle cx="152" cy="68" r="7" fill="#2C2C2A"/>
+                <rect x="62" y="48" width="76" height="44" rx="10" fill="#1a2540"/>
+                <rect class="bot-eye" x="78" y="60" width="4" height="14" rx="2" fill="#5DCAA5"/>
+                <rect class="bot-eye" x="118" y="60" width="4" height="14" rx="2" fill="#5DCAA5"/>
+                <path id="botMouth" d="M 88 78 Q 100 86 112 78" stroke="#5DCAA5" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M 60 108 Q 60 145 100 145 Q 140 145 140 108 Z" fill="#E8EEF5" stroke="#B5C2D1" stroke-width="1"/>
+                <path d="M 65 118 Q 55 138 60 155" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <rect x="54" y="153" width="12" height="14" rx="4" fill="#E8EEF5" stroke="#B5C2D1" stroke-width="1"/>
+              </g>
+              <g id="botArm">
+                <path d="M 135 118 Q 152 110 158 95" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <rect x="152" y="82" width="14" height="14" rx="4" fill="#E8EEF5" stroke="#B5C2D1" stroke-width="1"/>
+              </g>
+            </svg>
+
+            <!-- Speech bubble -->
+            <div class="speech-bubble">
+              <span id="speechText">Tap the mic to start talking</span>
+            </div>
+
+            <!-- Status row -->
+            <div class="voice-status-row">
+              <span class="voice-status-dot" id="statusDot"></span>
+              <span class="voice-status-label" id="statusLabel">Ready</span>
+            </div>
+          </div>
+
+          <!-- Transcript bubbles -->
+          <div class="voice-transcript" id="voiceTranscript"></div>
+        </div>
+
+        <!-- Mic + voice selector -->
+        <div class="voice-controls">
+          <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+            <svg id="micIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <svg id="stopIcon" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+          </button>
+          <p class="mic-label" id="micLabel">Tap to speak</p>
+          <div class="voice-selector">
+            <button class="voice-opt active" data-voice="feminine">♀ Feminine</button>
+            <button class="voice-opt" data-voice="neutral">◐ Neutral</button>
+            <button class="voice-opt" data-voice="masculine">♂ Masculine</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ USER CHAT (100% unchanged) ══ -->
+      <div class="chat-win-header" id="chatHeader" style="display:none">
+        <button class="chat-back-btn" onclick="closeChat()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="chat-win-avatar" id="chatWinAvatar"></div>
+        <div class="chat-win-info">
+          <p class="chat-win-name" id="chatWinName"></p>
+          <p class="chat-win-sub" id="chatWinSub"></p>
+        </div>
+        <button class="chat-profile-btn" id="chatProfileBtn" style="display:none" onclick="openProfileModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          View Profile
+        </button>
+      </div>
+
+      <div class="chat-messages" id="chatMessages" style="display:none"></div>
+
+      <div class="chat-input-area" id="chatInputArea" style="display:none">
+        <div class="chat-input-wrap">
+          <textarea class="chat-textarea" id="chatTextarea" placeholder="Type a message..." rows="1"></textarea>
+          <button class="chat-send-btn" id="chatSendBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end chat-window -->
   </div><!-- end inbox-layout -->
 </div>
 
-<button class="fab" title="New message">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
+<!-- Profile modal (unchanged) -->
+<div class="profile-modal-overlay" id="profileOverlay" onclick="closeProfileModal(event)">
+  <div class="profile-modal" id="profileModal">
+    <button class="profile-modal-close" onclick="closeProfileModal(null, true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="profile-modal-avatar" id="modalAvatar"></div>
+    <h3 class="profile-modal-name" id="modalName"></h3>
+    <p class="profile-modal-sub" id="modalSub"></p>
+    <div class="profile-modal-stats" id="modalStats"></div>
+    <button class="profile-modal-msg-btn" id="modalMsgBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Send Message
+    </button>
+  </div>
+</div>
 
 <script src="{% static 'enduser/js/nav.js' %}"></script>
 <script src="{% static 'enduser/js/inbox.js' %}"></script>
+<script>const CURRENT_USER_ID = {{ user.id }};</script>
 </body>
 </html>

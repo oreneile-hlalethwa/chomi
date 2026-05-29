@@ -18,4 +18,13 @@ urlpatterns = [
     path('api/literacy/',      views.get_literacy,      name='literacy'),
     path('api/chat/',           views.continue_chat,    name='continue_chat'),
     path('api/chat-history/', views.get_chat_history,   name='chat_history'),
+    path('api/search-users/', views.search_users,      name='search_users'),
+    path('api/conversations/', views.get_conversations, name='get_conversations'),
+    path('api/conversations/<int:conversation_id>/messages/',         views.get_messages,      name='get_messages'),
+    path('api/send-message/',   views.send_message,      name='send_message'),
+    path('api/user-profile/<int:user_id>/', views.get_user_profile,  name='user_profile'),
+    path('api/inbox-chat/', views.inbox_chomi_chat,  name='inbox_chat'),
+    path('api/toggle-anonymous/', views.toggle_anonymous, name='toggle_anonymous'),
+    path('api/update-profile/', views.update_profile, name='update_profile'),
+    path('api/clear-data/',     views.clear_data,     name='clear_data'),
 ]
