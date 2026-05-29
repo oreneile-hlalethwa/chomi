@@ -3,73 +3,1079 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Chomi – Wellness Reels</title>
   <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
-  <link rel="stylesheet" href="{% static 'enduser/css/reels.css' %}" />
+  <style>
+    /* ========== CSS VARIABLES ========== */
+    :root {
+      --bg-page-light: #f8fafc;
+      --bg-card-light: #ffffff;
+      --text-main-light: #1e293b;
+      --text-muted-light: #64748b;
+      --border-light: #e2e8f0;
+      
+      --bg-page-dark: #000000;
+      --bg-card-dark: #0f0f0f;
+      --text-main-dark: #ffffff;
+      --text-muted-dark: #a1a1aa;
+      --border-dark: #27272a;
+      
+      --accent-green: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
+      --accent-blue: #3b82f6;
+      --navbar-height: 60px;
+      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    }
+
+    /* Light Mode (Default) */
+    [data-theme="light"] {
+      --bg-page: var(--bg-page-light);
+      --bg-card: var(--bg-card-light);
+      --text-main: var(--text-main-light);
+      --text-muted: var(--text-muted-light);
+      --border: var(--border-light);
+      --navbar-bg: rgba(255, 255, 255, 0.95);
+      --navbar-icon: #1e293b;
+      --overlay-gradient: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] {
+      --bg-page: var(--bg-page-dark);
+      --bg-card: var(--bg-card-dark);
+      --text-main: var(--text-main-dark);
+      --text-muted: var(--text-muted-dark);
+      --border: var(--border-dark);
+      --navbar-bg: rgba(0, 0, 0, 0.95);
+      --navbar-icon: #ffffff;
+      --overlay-gradient: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-page);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--text-main);
+      line-height: 1.5;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ========== COMPACT NAVIGATION BAR (ICONS ONLY) ========== */
+    .compact-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--navbar-height);
+      background: var(--navbar-bg);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: var(--safe-area-inset-bottom);
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 16px;
+      transition: all 0.2s;
+      color: var(--navbar-icon);
+      opacity: 0.7;
+    }
+
+    .nav-item.active {
+      opacity: 1;
+    }
+
+    .nav-item.active svg {
+      stroke: var(--accent-green);
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    .nav-label {
+      font-size: 0.65rem;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* ========== REELS CONTAINER ========== */
+    .reels-container {
+      height: 100vh;
+      width: 100%;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      position: relative;
+      padding-bottom: var(--navbar-height);
+    }
+
+    .reels-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ========== INDIVIDUAL REEL ========== */
+    .reel {
+      height: calc(100vh - var(--navbar-height));
+      width: 100%;
+      scroll-snap-align: start;
+      position: relative;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: -webkit-fill-available;
+    }
+
+    /* Video Container */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    /* ========== OVERLAY CONTENT ========== */
+    .reel-overlay {
+      position: absolute;
+      bottom: calc(15px + var(--safe-area-inset-bottom));
+      left: 0;
+      right: 0;
+      background: var(--overlay-gradient);
+      padding: 1.5rem 1rem 1rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+
+    /* Left side - Info */
+    .reel-info {
+      flex: 1;
+      pointer-events: auto;
+      max-width: calc(100% - 80px);
+    }
+
+    .channel-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .channel-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 2px solid white;
+    }
+
+    .channel-avatar.green { background: linear-gradient(135deg, #d1fae5, #10b981); }
+    .channel-avatar.purple { background: linear-gradient(135deg, #ede9fe, #8b5cf6); }
+    .channel-avatar.pink { background: linear-gradient(135deg, #fce7f3, #ec4899); }
+    .channel-avatar.blue { background: linear-gradient(135deg, #dbeafe, #3b82f6); }
+
+    .channel-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+      margin: 0;
+    }
+
+    .follow-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+    }
+
+    .follow-btn:hover {
+      background: var(--accent-green);
+      transform: scale(1.05);
+    }
+
+    .reel-caption {
+      color: white;
+      font-size: 0.8rem;
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
+    }
+
+    .reel-meta {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.65rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    /* Right side - Action Buttons */
+    .reel-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      pointer-events: auto;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .action-btn svg {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .action-count {
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.3);
+      z-index: 10;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: white;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    /* Volume Button */
+    .volume-btn {
+      position: absolute;
+      bottom: calc(20px + var(--safe-area-inset-bottom));
+      right: 12px;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 15;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s;
+    }
+
+    .volume-btn:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(1.05);
+    }
+
+    .volume-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Play/Pause Indicator */
+    .play-pause-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 20;
+      backdrop-filter: blur(5px);
+    }
+
+    .play-pause-indicator.show {
+      opacity: 1;
+    }
+
+    .play-pause-indicator svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+
+    /* Loading Indicator */
+    .loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 35px;
+      height: 35px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: none;
+      z-index: 25;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Time display */
+    .video-time {
+      position: absolute;
+      bottom: calc(20px + var(--safe-area-inset-bottom));
+      left: 12px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      color: white;
+      font-family: monospace;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .reel-caption {
+        font-size: 0.7rem;
+      }
+      .action-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+      .channel-avatar {
+        width: 32px;
+        height: 32px;
+      }
+      .reel-overlay {
+        bottom: calc(10px + var(--safe-area-inset-bottom));
+        padding: 1rem 0.75rem 0.75rem 0.75rem;
+      }
+      .volume-btn {
+        bottom: calc(15px + var(--safe-area-inset-bottom));
+        width: 28px;
+        height: 28px;
+      }
+      .video-time {
+        bottom: calc(15px + var(--safe-area-inset-bottom));
+        font-size: 0.6rem;
+      }
+      .channel-name {
+        font-size: 0.8rem;
+      }
+      .nav-item svg {
+        width: 22px;
+        height: 22px;
+      }
+      .nav-label {
+        font-size: 0.6rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="page-wrap" style="padding-left:0;padding-right:0;max-width:100%;">
-  <div style="max-width:680px;margin:0 auto;padding:0 1.25rem;">
-    <h2 class="page-title">Wellness Reels</h2>
+<div class="reels-container" id="reelsContainer">
+  <!-- Reel 1 - Mental Health Awareness -->
+  <div class="reel" data-reel-index="0">
+    <div class="video-wrapper">
+      <video preload="metadata" playsinline webkit-playsinline>
+        <source src="{% static 'enduser/assets/Mental Health Awareness Task 💚Healing isn’t linear, but every step forward still counts. Speak .mp4' %}" type="video/mp4">
+      </video>
+      <div class="loading-indicator"></div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="play-pause-indicator">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </div>
+      <div class="video-time">0:00 / 0:00</div>
+    </div>
+    <div class="reel-overlay">
+      <div class="reel-info">
+        <div class="channel-info">
+          <div class="channel-avatar green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="channel-name">@mindfulsa</p>
+          </div>
+          <button class="follow-btn">Follow</button>
+        </div>
+        <p class="reel-caption">💚 Healing isn't linear, but every step forward still counts. Speak up, reach out. #MentalHealthAwareness</p>
+        <div class="reel-meta">
+          <span>🎵 Original Audio</span>
+          <span>❤️ 15.2K likes</span>
+        </div>
+      </div>
+      <div class="reel-actions">
+        <button class="action-btn like-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="action-count">15.2K</span>
+        </button>
+        <button class="action-btn comment-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="action-count">189</span>
+        </button>
+        <button class="action-btn share-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span class="action-count">Share</span>
+        </button>
+      </div>
+    </div>
+    <button class="volume-btn" data-volume="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 5L6 9H2v6h4l5 4z"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
   </div>
-  <div class="video-feed">
-    <div class="vid-card">
-      <div class="vid-header">
-        <div class="avatar c-green" style="width:36px;height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
-        <div><p class="vid-ch">MindfulSA</p><p class="vid-sub">Mental Wellness</p></div>
-        <button class="follow-btn">Follow</button>
+
+  <!-- Reel 2 - YouTube Addiction -->
+  <div class="reel" data-reel-index="1">
+    <div class="video-wrapper">
+      <video preload="metadata" playsinline webkit-playsinline>
+        <source src="{% static 'enduser/assets/YTDown_YouTube_Addiction-Types-Causes-and-Solutions-For_Media_dsTwkX1cdCY_001_1080p.mp4' %}" type="video/mp4">
+      </video>
+      <div class="loading-indicator"></div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
       </div>
-      <div class="vid-thumb" style="background:linear-gradient(135deg,#c5e0d4,#2d7a5f);">
-        <div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      <div class="play-pause-indicator">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
       </div>
-      <p class="vid-title">5-minute breathing technique for instant calm</p>
-      <p class="vid-meta">124K views · 3 days ago</p>
-      <div class="vid-actions">
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 4.2K</button>
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 318</button>
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      <div class="video-time">0:00 / 0:00</div>
+    </div>
+    <div class="reel-overlay">
+      <div class="reel-info">
+        <div class="channel-info">
+          <div class="channel-avatar purple">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="channel-name">@therapytalks</p>
+          </div>
+          <button class="follow-btn">Follow</button>
+        </div>
+        <p class="reel-caption">📱 Understanding YouTube addiction: types, causes, and practical solutions for digital wellness. #DigitalDetox</p>
+        <div class="reel-meta">
+          <span>🎵 Original Audio</span>
+          <span>❤️ 8.7K likes</span>
+        </div>
+      </div>
+      <div class="reel-actions">
+        <button class="action-btn like-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="action-count">8.7K</span>
+        </button>
+        <button class="action-btn comment-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="action-count">124</span>
+        </button>
+        <button class="action-btn share-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span class="action-count">Share</span>
+        </button>
       </div>
     </div>
-    <div class="vid-card">
-      <div class="vid-header">
-        <div class="avatar c-purple" style="width:36px;height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-        <div><p class="vid-ch">TherapyTalks</p><p class="vid-sub">Professional Advice</p></div>
-        <button class="follow-btn">Follow</button>
+    <button class="volume-btn" data-volume="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 5L6 9H2v6h4l5 4z"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Reel 3 - We All Have Mental Health -->
+  <div class="reel" data-reel-index="2">
+    <div class="video-wrapper">
+      <video preload="metadata" playsinline webkit-playsinline>
+        <source src="{% static 'enduser/assets/YTDown_YouTube_We-All-Have-Mental-Health_Media_DxIDKZHW3-E_001_1080p.mp4' %}" type="video/mp4">
+      </video>
+      <div class="loading-indicator"></div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
       </div>
-      <div class="vid-thumb" style="background:linear-gradient(135deg,#c8dfd6,#4a9e7e);">
-        <div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      <div class="play-pause-indicator">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
       </div>
-      <p class="vid-title">Signs you might be experiencing burnout (and what to do)</p>
-      <p class="vid-meta">89K views · 1 week ago</p>
-      <div class="vid-actions">
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 3.1K</button>
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 247</button>
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      <div class="video-time">0:00 / 0:00</div>
+    </div>
+    <div class="reel-overlay">
+      <div class="reel-info">
+        <div class="channel-info">
+          <div class="channel-avatar pink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="channel-name">@healingspacesa</p>
+          </div>
+          <button class="follow-btn">Follow</button>
+        </div>
+        <p class="reel-caption">🧠 We all have mental health. Let's break the stigma and talk about it openly. #MentalHealthMatters</p>
+        <div class="reel-meta">
+          <span>🎵 Original Audio</span>
+          <span>❤️ 22.1K likes</span>
+        </div>
+      </div>
+      <div class="reel-actions">
+        <button class="action-btn like-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="action-count">22.1K</span>
+        </button>
+        <button class="action-btn comment-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="action-count">356</span>
+        </button>
+        <button class="action-btn share-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span class="action-count">Share</span>
+        </button>
       </div>
     </div>
-    <div class="vid-card">
-      <div class="vid-header">
-        <div class="avatar c-pink" style="width:36px;height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <div><p class="vid-ch">HealingSpaceSA</p><p class="vid-sub">Community Stories</p></div>
-        <button class="follow-btn">Follow</button>
+    <button class="volume-btn" data-volume="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 5L6 9H2v6h4l5 4z"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Reel 4 - Teen Depression -->
+  <div class="reel" data-reel-index="3">
+    <div class="video-wrapper">
+      <video preload="metadata" playsinline webkit-playsinline>
+        <source src="{% static 'enduser/assets/main.mp4' %}" type="video/mp4">
+      </video>
+      <div class="loading-indicator"></div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
       </div>
-      <div class="vid-thumb" style="background:linear-gradient(135deg,#e8f3ee,#e8b96a);">
-        <div class="play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      <div class="play-pause-indicator">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
       </div>
-      <p class="vid-title">My journey through depression — a real story from Joburg</p>
-      <p class="vid-meta">201K views · 2 weeks ago</p>
-      <div class="vid-actions">
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 9.8K</button>
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 1.2K</button>
-        <button class="vid-action"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      <div class="video-time">0:00 / 0:00</div>
+    </div>
+    <div class="reel-overlay">
+      <div class="reel-info">
+        <div class="channel-info">
+          <div class="channel-avatar blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="channel-name">@youthmentalhealthsa</p>
+          </div>
+          <button class="follow-btn">Follow</button>
+        </div>
+        <p class="reel-caption">🧠 Teen Depression: Learn common signs and symptoms of teen depression and what you can do to help manage these feelings. #TeenMentalHealth #YouAreNotAlone</p>
+        <div class="reel-meta">
+          <span>🎵 Original Audio</span>
+          <span>❤️ 12.5K likes</span>
+        </div>
+      </div>
+      <div class="reel-actions">
+        <button class="action-btn like-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="action-count">12.5K</span>
+        </button>
+        <button class="action-btn comment-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="action-count">423</span>
+        </button>
+        <button class="action-btn share-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span class="action-count">Share</span>
+        </button>
       </div>
     </div>
+    <button class="volume-btn" data-volume="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 5L6 9H2v6h4l5 4z"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
   </div>
 </div>
 
+<!-- Compact Navigation Bar (Icons Only) -->
+<div class="compact-nav">
+  <button class="nav-item" data-nav="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span class="nav-label">Home</span>
+  </button>
+  <button class="nav-item active" data-nav="reels">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <polygon points="10 8 16 12 10 16 10 8"/>
+    </svg>
+    <span class="nav-label">Reels</span>
+  </button>
+  <button class="nav-item" data-nav="support">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+    <span class="nav-label">Support</span>
+  </button>
+  <button class="nav-item" data-nav="profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span class="nav-label">Profile</span>
+  </button>
+</div>
+
 <script src="{% static 'enduser/js/nav.js' %}"></script>
-<script src="{% static 'enduser/js/reels.js' %}"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ========== GET THEME FROM HTML ELEMENT (Set by global.js) ==========
+    // The theme is already set on the HTML element by your global.js
+    // This page will automatically use light/dark mode based on that
+    
+    // ========== COMPACT NAVIGATION ==========
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const navType = item.getAttribute('data-nav');
+        if (navType === 'home') {
+          window.location.href = '/';
+        } else if (navType === 'reels') {
+          // Already on reels
+        } else if (navType === 'support') {
+          window.location.href = '/support/';
+        } else if (navType === 'profile') {
+          window.location.href = '/profile/';
+        }
+      });
+    });
+
+    // ========== INSTAGRAM-STYLE REELS FUNCTIONALITY ==========
+    const reels = document.querySelectorAll('.reel');
+    let currentReelIndex = 0;
+    
+    // Video elements and their associated elements
+    const videos = Array.from(document.querySelectorAll('.reel .video-wrapper video'));
+    const progressBars = Array.from(document.querySelectorAll('.progress-fill'));
+    const volumeBtns = Array.from(document.querySelectorAll('.volume-btn'));
+    const playPauseIndicators = Array.from(document.querySelectorAll('.play-pause-indicator'));
+    const videoTimeDisplays = Array.from(document.querySelectorAll('.video-time'));
+    
+    // Function to format time (seconds to MM:SS)
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // Function to update time display
+    function updateTimeDisplay(video, displayElement) {
+      if (video && displayElement) {
+        const current = video.currentTime || 0;
+        const duration = video.duration || 0;
+        displayElement.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+      }
+    }
+    
+    // Function to play video
+    function playVideo(video, progressBar, timeDisplay, playPauseIndicator) {
+      if (video && video.paused) {
+        video.play().catch(e => console.log('Play error:', e));
+        
+        // Hide play indicator if showing
+        if (playPauseIndicator) {
+          playPauseIndicator.classList.remove('show');
+        }
+        
+        // Update progress bar and time
+        const updateProgress = () => {
+          if (video.duration) {
+            const percent = (video.currentTime / video.duration) * 100;
+            if (progressBar) {
+              progressBar.style.width = `${percent}%`;
+            }
+            if (timeDisplay) {
+              updateTimeDisplay(video, timeDisplay);
+            }
+          }
+        };
+        
+        video.addEventListener('timeupdate', updateProgress);
+        video.updateProgressHandler = updateProgress;
+        
+        // Handle video end - loop back to start
+        const onEnded = () => {
+          video.currentTime = 0;
+          video.play();
+        };
+        video.addEventListener('ended', onEnded);
+        video.endedHandler = onEnded;
+      }
+    }
+    
+    function pauseVideo(video, progressBar, timeDisplay, playPauseIndicator) {
+      if (video && !video.paused) {
+        video.pause();
+        
+        // Show play indicator
+        if (playPauseIndicator) {
+          playPauseIndicator.classList.add('show');
+          setTimeout(() => {
+            if (playPauseIndicator) {
+              playPauseIndicator.classList.remove('show');
+            }
+          }, 500);
+        }
+      }
+    }
+    
+    // Toggle play/pause on video click
+    videos.forEach((video, index) => {
+      const wrapper = video.closest('.video-wrapper');
+      if (wrapper) {
+        wrapper.addEventListener('click', (e) => {
+          // Don't trigger if clicking on volume button
+          if (e.target.closest('.volume-btn')) return;
+          
+          if (video.paused) {
+            playVideo(video, progressBars[index], videoTimeDisplays[index], playPauseIndicators[index]);
+          } else {
+            pauseVideo(video, progressBars[index], videoTimeDisplays[index], playPauseIndicators[index]);
+          }
+        });
+      }
+    });
+    
+    // Intersection Observer to detect visible reel
+    const observerOptions = {
+      threshold: 0.6
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const reel = entry.target;
+          const index = parseInt(reel.getAttribute('data-reel-index'));
+          if (!isNaN(index)) {
+            currentReelIndex = index;
+            // Pause all videos and play current
+            videos.forEach((video, i) => {
+              if (i === currentReelIndex) {
+                playVideo(video, progressBars[i], videoTimeDisplays[i], playPauseIndicators[i]);
+              } else {
+                pauseVideo(video, progressBars[i], videoTimeDisplays[i], playPauseIndicators[i]);
+                // Reset progress bar for non-playing videos
+                if (progressBars[i]) {
+                  progressBars[i].style.width = '0%';
+                }
+              }
+            });
+          }
+        }
+      });
+    }, observerOptions);
+    
+    // Observe each reel
+    reels.forEach((reel, index) => {
+      reel.setAttribute('data-reel-index', index);
+      observer.observe(reel);
+    });
+    
+    // Play first video initially
+    if (videos[0]) {
+      playVideo(videos[0], progressBars[0], videoTimeDisplays[0], playPauseIndicators[0]);
+    }
+    
+    // ========== VOLUME CONTROL ==========
+    volumeBtns.forEach((btn, index) => {
+      let isMuted = false;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const video = videos[index];
+        if (video) {
+          isMuted = !isMuted;
+          video.muted = isMuted;
+          btn.innerHTML = isMuted ? 
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>' :
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+        }
+      });
+    });
+    
+    // ========== LIKE BUTTON FUNCTIONALITY ==========
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
+      let liked = false;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        liked = !liked;
+        const svg = btn.querySelector('svg');
+        const countSpan = btn.querySelector('.action-count');
+        
+        if (liked) {
+          svg.style.fill = '#ec4899';
+          svg.style.stroke = '#ec4899';
+          // Increment count
+          let currentCount = parseFloat(countSpan.innerText.replace('K', '')) * 1000;
+          if (isNaN(currentCount)) currentCount = 0;
+          let newCount = currentCount + 1;
+          if (newCount >= 1000) {
+            countSpan.innerText = (newCount / 1000).toFixed(1) + 'K';
+          } else {
+            countSpan.innerText = newCount;
+          }
+        } else {
+          svg.style.fill = 'none';
+          svg.style.stroke = 'currentColor';
+          // Decrement count
+          let currentCount = parseFloat(countSpan.innerText.replace('K', '')) * 1000;
+          if (isNaN(currentCount)) currentCount = 0;
+          let newCount = currentCount - 1;
+          if (newCount >= 1000) {
+            countSpan.innerText = (newCount / 1000).toFixed(1) + 'K';
+          } else {
+            countSpan.innerText = newCount;
+          }
+        }
+      });
+    });
+    
+    // ========== DOUBLE TAP TO LIKE ==========
+    reels.forEach((reel) => {
+      let tapCount = 0;
+      let tapTimer;
+      const videoWrapper = reel.querySelector('.video-wrapper');
+      
+      if (videoWrapper) {
+        videoWrapper.addEventListener('click', (e) => {
+          // Don't trigger if clicking on buttons
+          if (e.target.closest('.action-btn') || e.target.closest('.volume-btn') || e.target.closest('.follow-btn')) {
+            return;
+          }
+          
+          tapCount++;
+          if (tapCount === 1) {
+            tapTimer = setTimeout(() => {
+              tapCount = 0;
+            }, 300);
+          } else if (tapCount === 2) {
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            // Double tap like
+            const likeBtn = reel.querySelector('.like-btn');
+            if (likeBtn) {
+              likeBtn.click();
+              showHeartAnimation(e);
+            }
+          }
+        });
+      }
+    });
+    
+    function showHeartAnimation(e) {
+      const heart = document.createElement('div');
+      heart.innerHTML = '❤️';
+      heart.style.position = 'fixed';
+      heart.style.left = `${e.clientX}px`;
+      heart.style.top = `${e.clientY}px`;
+      heart.style.fontSize = '50px';
+      heart.style.transform = 'translate(-50%, -50%) scale(0)';
+      heart.style.transition = 'transform 0.3s ease';
+      heart.style.pointerEvents = 'none';
+      heart.style.zIndex = '1000';
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        heart.style.transform = 'translate(-50%, -50%) scale(1)';
+      }, 10);
+      
+      setTimeout(() => {
+        heart.style.transform = 'translate(-50%, -50%) scale(1.5)';
+        heart.style.opacity = '0';
+      }, 300);
+      
+      setTimeout(() => {
+        heart.remove();
+      }, 600);
+    }
+    
+    // ========== SHARE FUNCTIONALITY ==========
+    const shareBtns = document.querySelectorAll('.share-btn');
+    shareBtns.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const reel = btn.closest('.reel');
+        const caption = reel.querySelector('.reel-caption').innerText;
+        
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Chomi Wellness Reel',
+              text: caption,
+              url: window.location.href
+            });
+          } catch (err) {
+            console.log('Share cancelled');
+          }
+        } else {
+          navigator.clipboard.writeText(caption);
+          alert('Link copied to clipboard!');
+        }
+      });
+    });
+    
+    // ========== INITIALIZE TIME DISPLAYS ==========
+    videos.forEach((video, index) => {
+      if (video.readyState >= 1) {
+        updateTimeDisplay(video, videoTimeDisplays[index]);
+      }
+      video.addEventListener('loadedmetadata', () => {
+        updateTimeDisplay(video, videoTimeDisplays[index]);
+      });
+    });
+  });
+</script>
 </body>
 </html>
