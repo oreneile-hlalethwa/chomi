@@ -1,19 +1,18 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chomi — Research Dashboard</title>
-  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="{% static 'customer/css/dashboard.css' %}"/>
 </head>
 <body>
 
 <div class="layout">
 
-  <!-- ═══ MOBILE OVERLAY ═══ -->
   <div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
 
-  <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">chomi<span>.</span></div>
     <div class="sidebar-subtitle">Research Dashboard</div>
@@ -52,6 +51,12 @@
       Export Data
     </button>
 
+    <div class="nav-section-label">Navigation</div>
+    <button class="nav-link" onclick="window.location.href='/dashboard/'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Home
+    </button>
+
     <div class="sidebar-footer">
       <div class="researcher-tag">
         <div class="researcher-avatar">Dr</div>
@@ -63,10 +68,8 @@
     </div>
   </aside>
 
-  <!-- ═══ MAIN ═══ -->
   <main class="main">
 
-    <!-- TOP BAR -->
     <header class="topbar">
       <div class="topbar-left">
         <button class="mobile-menu-btn" onclick="openSidebar()" aria-label="Open menu">
@@ -74,7 +77,6 @@
         </button>
         <span class="topbar-title" id="topbarTitle">Overview — 30 days</span>
       </div>
-
       <div class="topbar-right">
         <div class="date-range">
           <button class="date-btn" onclick="setRange(7, this)">7D</button>
@@ -97,7 +99,6 @@
       </div>
     </header>
 
-    <!-- DATE PICKER -->
     <div class="date-picker-overlay" id="datePickerOverlay" onclick="closeDatePicker()"></div>
     <div class="date-picker-popup hidden" id="datePickerPopup">
       <p class="dp-title">Custom date range</p>
@@ -109,14 +110,8 @@
         <button class="dp-quick-btn" onclick="applyQuick(180)">Last 6 months</button>
       </div>
       <div class="dp-fields">
-        <div>
-          <label class="dp-field-label">From</label>
-          <input class="dp-input" type="date" id="dateFrom"/>
-        </div>
-        <div>
-          <label class="dp-field-label">To</label>
-          <input class="dp-input" type="date" id="dateTo"/>
-        </div>
+        <div><label class="dp-field-label">From</label><input class="dp-input" type="date" id="dateFrom"/></div>
+        <div><label class="dp-field-label">To</label><input class="dp-input" type="date" id="dateTo"/></div>
       </div>
       <div class="dp-range-display" id="dpRangeDisplay"></div>
       <div class="dp-actions">
@@ -125,67 +120,40 @@
       </div>
     </div>
 
-    <!-- DASHBOARD CONTENT -->
     <div class="dashboard">
 
-      <!-- ── STAT CARDS ── -->
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-icon green">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
+          <div class="stat-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <div class="stat-value">4,821</div>
           <div class="stat-label">Total Active Users</div>
-          <div class="stat-change up">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-            +12.4% vs last month
-          </div>
+          <div class="stat-change up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+12.4% vs last month</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon gold">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          </div>
+          <div class="stat-icon gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
           <div class="stat-value">28,394</div>
           <div class="stat-label">Mood Check-ins This Month</div>
-          <div class="stat-change up">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-            +8.7% vs last month
-          </div>
+          <div class="stat-change up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+8.7% vs last month</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon red">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.58 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6.29 6.29l.87-1.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 15.42z"/></svg>
-          </div>
+          <div class="stat-icon red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.58 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6.29 6.29l.87-1.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 15.42z"/></svg></div>
           <div class="stat-value">1,247</div>
           <div class="stat-label">Support Tab Visits</div>
-          <div class="stat-change down">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 9 12 15 6 9"/></svg>
-            −3.2% vs last month
-          </div>
+          <div class="stat-change down"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 9 12 15 6 9"/></svg>−3.2% vs last month</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon blue">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
+          <div class="stat-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
           <div class="stat-value">68%</div>
           <div class="stat-label">7-Day Retention Rate</div>
-          <div class="stat-change up">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-            +5.1% vs last month
-          </div>
+          <div class="stat-change up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+5.1% vs last month</div>
         </div>
       </div>
 
-      <!-- ── MOOD & EMOTIONAL TRENDS ── -->
       <div class="section-heading">Mood &amp; Emotional Trends</div>
-
       <div class="grid-32">
         <div class="chart-card">
           <div class="chart-header">
-            <div>
-              <div class="chart-title">Mood Trends Over Time</div>
-              <div class="chart-sub">Daily average mood score — last 30 days</div>
-            </div>
+            <div><div class="chart-title">Mood Trends Over Time</div><div class="chart-sub">Daily average mood score — last 30 days</div></div>
             <div class="chart-legend">
               <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Positive</div>
               <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Negative</div>
@@ -194,33 +162,18 @@
           <svg class="chart" viewBox="0 0 520 180" id="moodLineChart"></svg>
         </div>
         <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <div class="chart-title">Mood Distribution</div>
-              <div class="chart-sub">All check-ins this month</div>
-            </div>
-          </div>
+          <div class="chart-header"><div><div class="chart-title">Mood Distribution</div><div class="chart-sub">All check-ins this month</div></div></div>
           <div class="mood-bars" id="moodBars"></div>
         </div>
       </div>
 
       <div class="grid-2">
         <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <div class="chart-title">Mood by Day of Week</div>
-              <div class="chart-sub">Average mood score per weekday</div>
-            </div>
-          </div>
+          <div class="chart-header"><div><div class="chart-title">Mood by Day of Week</div><div class="chart-sub">Average mood score per weekday</div></div></div>
           <svg class="chart" viewBox="0 0 420 160" id="moodByDayChart"></svg>
         </div>
         <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <div class="chart-title">30-Day Check-in Heatmap</div>
-              <div class="chart-sub">Intensity of mood logging activity</div>
-            </div>
-          </div>
+          <div class="chart-header"><div><div class="chart-title">30-Day Check-in Heatmap</div><div class="chart-sub">Intensity of mood logging activity</div></div></div>
           <div class="heatmap-days" id="heatmapDays"></div>
           <div class="heatmap-grid" id="heatmapGrid"></div>
           <div class="heatmap-labels">
@@ -236,25 +189,15 @@
         </div>
       </div>
 
-      <!-- ── USER BEHAVIOUR ── -->
       <div class="section-heading">User Behaviour &amp; Engagement</div>
-
       <div class="grid-3">
         <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <div class="chart-title">Feature Usage</div>
-              <div class="chart-sub">Page visits this month</div>
-            </div>
-          </div>
+          <div class="chart-header"><div><div class="chart-title">Feature Usage</div><div class="chart-sub">Page visits this month</div></div></div>
           <div class="feature-list" id="featureList"></div>
         </div>
         <div class="chart-card">
           <div class="chart-header">
-            <div>
-              <div class="chart-title">New vs Returning Users</div>
-              <div class="chart-sub">Monthly breakdown</div>
-            </div>
+            <div><div class="chart-title">New vs Returning Users</div><div class="chart-sub">Monthly breakdown</div></div>
             <div class="chart-legend">
               <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Returning</div>
               <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>New</div>
@@ -263,20 +206,15 @@
           <svg class="chart" viewBox="0 0 300 160" id="userTypeChart"></svg>
         </div>
         <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <div class="chart-title">Check-in Streaks</div>
-              <div class="chart-sub">User streak distribution</div>
-            </div>
-          </div>
+          <div class="chart-header"><div><div class="chart-title">Check-in Streaks</div><div class="chart-sub">User streak distribution</div></div></div>
           <svg class="chart" viewBox="0 0 300 160" id="streakChart"></svg>
         </div>
       </div>
 
-    </div><!-- end dashboard -->
+    </div>
   </main>
-</div><!-- end layout -->
+</div>
 
-<script src="js/dashboard.js"></script>
+<script src="{% static 'customer/js/dashboard.js' %}"></script>
 </body>
 </html>

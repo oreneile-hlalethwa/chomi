@@ -27,4 +27,10 @@ urlpatterns = [
     path('api/toggle-anonymous/', views.toggle_anonymous, name='toggle_anonymous'),
     path('api/update-profile/', views.update_profile, name='update_profile'),
     path('api/clear-data/',     views.clear_data,     name='clear_data'),
+    path('api/emergency-contacts/',              views.get_emergency_contacts,    name='get_emergency_contacts'),
+    path('api/emergency-contacts/add/',          views.add_emergency_contact,     name='add_emergency_contact'),
+    path('api/emergency-contacts/<int:contact_id>/delete/', views.delete_emergency_contact, name='delete_emergency_contact'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/admin/',     views.admin_portal_view,        name='admin_portal'),
+    path('dashboard/research/',  views.research_dashboard_view,  name='research_dashboard'),
 ]

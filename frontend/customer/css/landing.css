@@ -1,0 +1,122 @@
+:root {
+  --green:      #2d7a5f;
+  --green-soft: rgba(45,122,95,0.08);
+  --gold:       #e8b96a;
+  --gold-soft:  rgba(232,185,106,0.12);
+  --bg:         #ffffff;
+  --bg-soft:    #f5f7f6;
+  --bg-card:    #ffffff;
+  --text:       #1a1a1a;
+  --text-muted: #5a6a62;
+  --text-light: #9aaba2;
+  --border:     rgba(0,0,0,0.08);
+  --shadow:     0 2px 16px rgba(0,0,0,0.06);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.1);
+  --radius:     20px;
+  --radius-sm:  12px;
+  --font-d:     'Fraunces', Georgia, serif;
+  --font-b:     'DM Sans', system-ui, sans-serif;
+}
+[data-theme="dark"] {
+  --bg:         #111111;
+  --bg-soft:    #1e1e1e;
+  --bg-card:    #1e1e1e;
+  --text:       #f0f0f0;
+  --text-muted: #909090;
+  --text-light: #555555;
+  --border:     rgba(255,255,255,0.08);
+  --shadow:     0 2px 16px rgba(0,0,0,0.4);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.5);
+  --green-soft: rgba(45,122,95,0.15);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-b);
+  background: var(--bg-soft);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem 1.25rem;
+  transition: background 0.3s, color 0.3s;
+}
+a { text-decoration: none; color: inherit; }
+
+/* Theme button */
+.theme-btn {
+  position: fixed; top: 1.25rem; right: 1.25rem;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+}
+.theme-btn:hover { background: var(--bg-soft); color: var(--text); }
+
+/* Header */
+.landing-header { text-align: center; margin-bottom: 3rem; }
+.landing-logo {
+  font-family: var(--font-d); font-size: 2.2rem; font-weight: 300;
+  letter-spacing: -0.02em; color: var(--text); margin-bottom: 0.25rem;
+}
+.landing-logo span { color: var(--gold); }
+.landing-sub {
+  font-size: 0.78rem; color: var(--text-muted);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.landing-greeting { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.75rem; }
+.landing-greeting strong { color: var(--text); }
+
+/* Portal cards */
+.portal-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1.5rem; width: 100%; max-width: 680px;
+}
+.portal-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 2rem 1.75rem;
+  display: flex; flex-direction: column; gap: 1.25rem;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow);
+}
+.portal-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--green); }
+.portal-icon {
+  width: 52px; height: 52px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.portal-icon.green { background: var(--green-soft); color: var(--green); }
+.portal-icon.gold  { background: var(--gold-soft);  color: #8a6a1a; }
+.portal-title {
+  font-family: var(--font-d); font-size: 1.2rem; font-weight: 300;
+  color: var(--text); margin-bottom: 0.35rem;
+}
+.portal-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+.portal-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; }
+.portal-tag {
+  font-size: 0.65rem; font-weight: 500; padding: 0.18rem 0.6rem;
+  border-radius: 100px; background: var(--bg-soft); color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+.portal-arrow {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.78rem; font-weight: 500; color: var(--green); margin-top: 0.5rem;
+}
+
+/* Sign out */
+.signout-link {
+  margin-top: 2.5rem; font-size: 0.78rem; color: var(--text-light);
+  display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;
+}
+.signout-link:hover { color: var(--text-muted); }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.portal-card:nth-child(1) { animation: fadeUp 0.4s ease 0.05s both; }
+.portal-card:nth-child(2) { animation: fadeUp 0.4s ease 0.15s both; }
+
+@media (max-width: 560px) {
+  .portal-grid { grid-template-columns: 1fr; max-width: 360px; }
+  .landing-logo { font-size: 1.8rem; }
+}

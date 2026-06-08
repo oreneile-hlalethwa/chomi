@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import User, MoodCheckIn, LiteracyRecommendation, ChatMessage, Conversation, Message
+from .models import User, MoodCheckIn, LiteracyRecommendation, ChatMessage, Conversation, Message, EmergencyContact
 from .claude_service import (
     get_chips_for_mood, get_mood_followup,
     get_mood_response, detect_topics,
@@ -18,6 +18,8 @@ from django.db import models
 
 def login_view(request):
     if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('dashboard')
         return redirect('home')
 
     if request.method == 'POST':
@@ -27,6 +29,8 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
+            if user.is_staff:
+                return redirect('dashboard')
             return redirect('home')
         else:
             messages.error(request, 'Invalid email or password.')
@@ -103,6 +107,14 @@ def home_view(request):
         'user': request.user,
     })
 
+
+@login_required(login_url='login')
+def inbox_view(request):
+    return render(request, 'enduser/inbox.html', {
+        'user': request.user,
+    })
+
+
 @login_required(login_url='login')
 def reels_view(request):
     return render(request, 'enduser/reels.html')
@@ -118,6 +130,13 @@ def profile_view(request):
     return render(request, 'enduser/profile.html', {
         'user': request.user,
     })
+
+
+@login_required(login_url='login')
+def dashboard_view(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    return render(request, 'customer/admin.html')
 
 
 @login_required(login_url='login')
@@ -148,10 +167,8 @@ def get_mood_chips(request):
 @login_required(login_url='login')
 @require_POST
 def submit_checkin(request):
-    """Save check-in and return AI response"""
     today = timezone.now().date()
 
-    # Block double submission
     if MoodCheckIn.objects.filter(user=request.user, timestamp__date=today).exists():
         return JsonResponse({'error': 'Already checked in today'}, status=400)
 
@@ -160,23 +177,19 @@ def submit_checkin(request):
     chip         = data.get('chip_selected', '')
     user_message = data.get('user_message', '')
 
-    # Get recent history for context
     recent = MoodCheckIn.objects.filter(
         user=request.user,
         timestamp__gte=timezone.now() - timedelta(days=7)
     ).values('mood', 'user_message')[:3]
     history = [f"{r['mood']}: {r['user_message']}" for r in recent]
 
-    # Get AI response
     ai_response = get_mood_response(
         mood, chip, user_message,
         request.user.first_name, history
     )
 
-    # Detect topics
     topics = detect_topics(mood, chip, user_message)
 
-    # Save check-in to database
     score_map = {'good': 5, 'calm': 4, 'stressed': 2, 'low': 2, 'sad': 1}
     MoodCheckIn.objects.create(
         user=request.user,
@@ -188,25 +201,19 @@ def submit_checkin(request):
         topics=topics,
     )
 
-    # Save chat messages for persistence
     display_msg = f"{chip} — {user_message}" if chip and user_message else chip or user_message
     if display_msg:
-        ChatMessage.objects.create(user=request.user, sender='user',  message=display_msg)
+        ChatMessage.objects.create(user=request.user, sender='user', message=display_msg)
     ChatMessage.objects.create(user=request.user, sender='chomi', message=ai_response)
 
-    # Generate personalised literacy recommendations
     try:
-        all_topics  = list(MoodCheckIn.objects.filter(
-            user=request.user
-        ).values_list('topics', flat=True))
+        all_topics  = list(MoodCheckIn.objects.filter(user=request.user).values_list('topics', flat=True))
         flat_topics = list(set([
             t for sublist in all_topics
             for t in (sublist if isinstance(sublist, list) else [])
         ]))[:5]
-
         if not flat_topics:
             flat_topics = [mood]
-
         recs = get_literacy_recommendations(request.user.first_name, flat_topics)
         LiteracyRecommendation.objects.filter(user=request.user).delete()
         for rec in recs:
@@ -225,7 +232,6 @@ def submit_checkin(request):
 
 @login_required(login_url='login')
 def get_mood_history(request):
-    """Return mood scores for the past 7 days for the chart"""
     today = timezone.now().date()
     days  = []
     for i in range(6, -1, -1):
@@ -244,7 +250,6 @@ def get_mood_history(request):
 
 @login_required(login_url='login')
 def get_literacy(request):
-    """Return personalised literacy recommendations"""
     recs = LiteracyRecommendation.objects.filter(user=request.user)[:4]
     data = [{'title': r.title, 'summary': r.summary, 'topic': r.topic} for r in recs]
     return JsonResponse({'recommendations': data})
@@ -253,11 +258,9 @@ def get_literacy(request):
 @login_required(login_url='login')
 @require_POST
 def continue_chat(request):
-    """Continue chatting after mood check-in"""
     data         = json.loads(request.body)
     user_message = data.get('user_message', '')
 
-    # Get recent check-in history for context
     recent = MoodCheckIn.objects.filter(
         user=request.user,
         timestamp__gte=timezone.now() - timedelta(days=7)
@@ -269,7 +272,6 @@ def continue_chat(request):
         request.user.first_name, history
     )
 
-    # Save both messages for persistence
     ChatMessage.objects.create(user=request.user, sender='user',  message=user_message)
     ChatMessage.objects.create(user=request.user, sender='chomi', message=ai_response)
 
@@ -278,20 +280,14 @@ def continue_chat(request):
 
 @login_required(login_url='login')
 def get_chat_history(request):
-    """Return today's chat messages"""
-    today    = timezone.now().date()
-    msgs = ChatMessage.objects.filter(
+    today = timezone.now().date()
+    msgs  = ChatMessage.objects.filter(
         user=request.user,
         timestamp__date=today
     )
     data = [{'sender': m.sender, 'message': m.message, 'time': m.timestamp.strftime('%H:%M')} for m in msgs]
     return JsonResponse({'messages': data})
 
-@login_required(login_url='login')
-def inbox_view(request):
-    return render(request, 'enduser/inbox.html', {
-        'user': request.user,
-    })
 
 @login_required(login_url='login')
 def search_users(request):
@@ -299,23 +295,25 @@ def search_users(request):
     if len(query) < 1:
         return JsonResponse({'users': []})
     users = User.objects.filter(
-    is_active=True,
-    is_anonymous=False
-).filter(
-    models.Q(first_name__icontains=query) |
-    models.Q(last_name__icontains=query)
-).exclude(id=request.user.id)[:10]
+        is_active=True,
+        is_anonymous=False
+    ).filter(
+        models.Q(first_name__icontains=query) |
+        models.Q(last_name__icontains=query)
+    ).exclude(id=request.user.id)[:10]
+
     data = []
     for u in users:
         data.append({
-            'id':         u.id,
-            'name':       'Anonymous' if u.is_anonymous else u.get_full_name(),
-            'initials':   ('AN' if u.is_anonymous else (u.first_name[0] + u.last_name[0]).upper()),
-            'is_anon':    u.is_anonymous,
-            'joined':     u.date_joined.strftime('%b %Y'),
-            'email':      '' if u.is_anonymous else u.email,
+            'id':       u.id,
+            'name':     u.get_full_name(),
+            'initials': (u.first_name[0] + u.last_name[0]).upper(),
+            'is_anon':  False,
+            'joined':   u.date_joined.strftime('%b %Y'),
+            'email':    u.email,
         })
     return JsonResponse({'users': data})
+
 
 @login_required(login_url='login')
 def get_conversations(request):
@@ -328,34 +326,36 @@ def get_conversations(request):
             continue
         unread = c.messages.filter(read=False).exclude(sender=request.user).count()
         data.append({
-            'id':          c.id,
-            'other_id':    other.id,
-            'name':        'Anonymous' if other.is_anonymous else other.get_full_name(),
-            'initials':    'AN' if other.is_anonymous else (other.first_name[0] + other.last_name[0]).upper(),
-            'is_anon':     other.is_anonymous,
-            'last_msg':    last_msg.content[:60],
-            'time':        last_msg.timestamp.strftime('%H:%M'),
-            'unread':      unread,
+            'id':       c.id,
+            'other_id': other.id,
+            'name':     'Anonymous' if other.is_anonymous else other.get_full_name(),
+            'initials': 'AN' if other.is_anonymous else (other.first_name[0] + other.last_name[0]).upper(),
+            'is_anon':  other.is_anonymous,
+            'last_msg': last_msg.content[:60],
+            'time':     last_msg.timestamp.strftime('%H:%M'),
+            'unread':   unread,
         })
     return JsonResponse({'conversations': data})
+
 
 @login_required(login_url='login')
 def get_messages(request, conversation_id):
     from django.shortcuts import get_object_or_404
     convo = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
     convo.messages.filter(read=False).exclude(sender=request.user).update(read=True)
-    msgs = convo.messages.all()
-    data = [{'sender_id': m.sender.id, 'content': m.content, 'time': m.timestamp.strftime('%H:%M'), 'is_me': m.sender == request.user} for m in msgs]
+    msgs  = convo.messages.all()
+    data  = [{'sender_id': m.sender.id, 'content': m.content, 'time': m.timestamp.strftime('%H:%M'), 'is_me': m.sender == request.user} for m in msgs]
     return JsonResponse({'messages': data})
+
 
 @login_required(login_url='login')
 @require_POST
 def send_message(request):
     from django.shortcuts import get_object_or_404
-    data       = json.loads(request.body)
-    other_id   = data.get('other_id')
-    content    = data.get('content', '').strip()
-    convo_id   = data.get('conversation_id')
+    data     = json.loads(request.body)
+    other_id = data.get('other_id')
+    content  = data.get('content', '').strip()
+    convo_id = data.get('conversation_id')
 
     if not content:
         return JsonResponse({'error': 'Empty message'}, status=400)
@@ -363,8 +363,7 @@ def send_message(request):
     if convo_id:
         convo = get_object_or_404(Conversation, id=convo_id, participants=request.user)
     else:
-        other = get_object_or_404(User, id=other_id)
-        # Find existing or create new conversation
+        other    = get_object_or_404(User, id=other_id)
         existing = request.user.conversations.filter(participants=other)
         if existing.exists():
             convo = existing.first()
@@ -374,13 +373,13 @@ def send_message(request):
 
     Message.objects.create(conversation=convo, sender=request.user, content=content)
     convo.save()
-
     return JsonResponse({'conversation_id': convo.id, 'status': 'sent'})
+
 
 @login_required(login_url='login')
 def get_user_profile(request, user_id):
     from django.shortcuts import get_object_or_404
-    u = get_object_or_404(User, id=user_id)
+    u        = get_object_or_404(User, id=user_id)
     checkins = MoodCheckIn.objects.filter(user=u).count()
     return JsonResponse({
         'id':       u.id,
@@ -392,6 +391,7 @@ def get_user_profile(request, user_id):
         'email':    '' if u.is_anonymous else u.email,
     })
 
+
 @login_required(login_url='login')
 @require_POST
 def inbox_chomi_chat(request):
@@ -401,20 +401,22 @@ def inbox_chomi_chat(request):
         user=request.user,
         timestamp__gte=timezone.now() - timedelta(days=7)
     ).values('mood', 'user_message')[:3]
-    history = [f"{r['mood']}: {r['user_message']}" for r in recent]
+    history     = [f"{r['mood']}: {r['user_message']}" for r in recent]
     ai_response = get_mood_response('chat', '', user_message, request.user.first_name, history)
     ChatMessage.objects.create(user=request.user, sender='user',  message=user_message)
     ChatMessage.objects.create(user=request.user, sender='chomi', message=ai_response)
     return JsonResponse({'response': ai_response})
 
+
 @login_required(login_url='login')
 @require_POST
 def toggle_anonymous(request):
-    data = json.loads(request.body)
+    data         = json.loads(request.body)
     is_anonymous = data.get('is_anonymous', True)
     request.user.is_anonymous = is_anonymous
     request.user.save()
     return JsonResponse({'is_anonymous': request.user.is_anonymous})
+
 
 @login_required(login_url='login')
 @require_POST
@@ -459,3 +461,49 @@ def clear_data(request):
             convo.delete()
 
     return JsonResponse({'status': 'ok'})
+
+
+@login_required(login_url='login')
+def get_emergency_contacts(request):
+    contacts = EmergencyContact.objects.filter(user=request.user)
+    data     = [{'id': c.id, 'name': c.name, 'phone': c.phone} for c in contacts]
+    return JsonResponse({'contacts': data})
+
+
+@login_required(login_url='login')
+@require_POST
+def add_emergency_contact(request):
+    data  = json.loads(request.body)
+    name  = data.get('name', '').strip()
+    phone = data.get('phone', '').strip()
+    if not name or not phone:
+        return JsonResponse({'error': 'Name and phone are required.'}, status=400)
+    contact = EmergencyContact.objects.create(user=request.user, name=name, phone=phone)
+    return JsonResponse({'status': 'ok', 'id': contact.id})
+
+
+@login_required(login_url='login')
+@require_POST
+def delete_emergency_contact(request, contact_id):
+    from django.shortcuts import get_object_or_404
+    contact = get_object_or_404(EmergencyContact, id=contact_id, user=request.user)
+    contact.delete()
+    return JsonResponse({'status': 'ok'})
+
+@login_required(login_url='login')
+def dashboard_view(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    return render(request, 'customer/landing.html', {'user': request.user})
+
+@login_required(login_url='login')
+def admin_portal_view(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    return render(request, 'customer/index.html')
+
+@login_required(login_url='login')
+def research_dashboard_view(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    return render(request, 'customer/dashboard.html')

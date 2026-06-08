@@ -7,236 +7,29 @@
   <title>Chomi – Support</title>
   <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
   <link rel="stylesheet" href="{% static 'enduser/css/support.css' %}" />
-  <style>
-    /* Modal Pop-up Layer styling */
-    .contact-modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: var(--bg-card, #ffffff);
-      padding: 1.75rem;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 420px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-      position: relative;
-    }
-    .modal-title {
-      margin: 0 0 1rem 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-    .modal-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .modal-form label {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #64748b;
-      margin-bottom: -0.25rem;
-    }
-    .modal-form input {
-      padding: 0.75rem;
-      border: 1px solid var(--border-color, #cbd5e1);
-      border-radius: 8px;
-      font-size: 0.95rem;
-    }
-    .modal-form input:focus {
-      outline: 2px solid #000;
-    }
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .cancel-btn {
-      background: none;
-      border: 1px solid var(--border-color, #cbd5e1);
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .cancel-btn:hover {
-      background: rgba(0,0,0,0.02);
-    }
-    .add-btn {
-      background: #000;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    /* Delete button */
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #ef4444;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-    .delete-btn:hover {
-      background: #fef2f2;
-    }
-
-    /* Loading and error states for nearby centers */
-    .loading-spinner {
-      text-align: center;
-      padding: 2rem;
-      color: #64748b;
-      font-size: 0.9rem;
-    }
-    .error-message {
-      background: #fee2e2;
-      color: #991b1b;
-      padding: 1rem;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 0.85rem;
-    }
-    .retry-btn {
-      background: #000;
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 0.75rem;
-      font-size: 0.8rem;
-    }
-    .distance-badge {
-      font-size: 0.7rem;
-      background: #e2e8f0;
-      padding: 0.2rem 0.5rem;
-      border-radius: 20px;
-      color: #1e293b;
-      font-weight: 500;
-      margin-left: 0.5rem;
-    }
-    .phone-link {
-      text-decoration: none;
-      color: #2563eb;
-      font-size: 0.7rem;
-      display: inline-block;
-      margin-top: 4px;
-    }
-
-    /* Personal contact card styling - same as hotline cards */
-    .personal-contact-card {
-      background: var(--bg-card, #ffffff);
-      border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 16px;
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      transition: all 0.2s;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      margin-bottom: 1rem;
-    }
-    .personal-contact-card:last-child {
-      margin-bottom: 1rem;
-    }
-    .personal-contact-card:hover {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-      border-color: #cbd5e1;
-    }
-
-    /* Add contact button inside card */
-    .add-contact-card {
-      background: var(--bg-card, #ffffff);
-      border: 1px dashed var(--border-color, #cbd5e1);
-      border-radius: 16px;
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      transition: all 0.2s;
-      cursor: pointer;
-      margin-top: 0;
-    }
-    .add-contact-card:hover {
-      background: rgba(0, 0, 0, 0.02);
-      border-color: #000;
-    }
-    .add-contact-content {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex: 1;
-    }
-    .add-contact-text h4 {
-      margin: 0 0 0.25rem 0;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-main, #1e293b);
-    }
-    .add-contact-text p {
-      margin: 0;
-      font-size: 0.8rem;
-      color: #64748b;
-    }
-    .add-contact-icon {
-      background: #000;
-      color: #fff;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Section for personal contacts above hotlines */
-    .personal-section {
-      margin-bottom: 2rem;
-    }
-    .personal-section .section-tag {
-      margin-bottom: 1rem;
-    }
-  </style>
 </head>
 <body>
 
 <div class="page-wrap">
-  <!-- Urgent System SOS Banner -->
+
+  <!-- SOS Banner -->
   <div class="sos-banner">
-    <div class="siren"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.58 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6.29 6.29l.87-1.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 15.42z"/></svg></div>
+    <div class="siren">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.58 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6.29 6.29l.87-1.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 15.42z"/></svg>
+    </div>
     <div><h2>Need help right now?</h2><p>You are not alone. These services are available 24/7.</p></div>
   </div>
 
-  <!-- Personal Contacts Section - ABOVE National Hotlines -->
+  <!-- Speed Dial -->
   <div class="personal-section">
-    <span class="section-tag">⭐ Your speed dial</span>
+    <span class="section-tag">Your speed dial</span>
     <div id="personalContactList"></div>
   </div>
 
-  <!-- Main System Content Grid Below -->
+  <!-- Main Grid -->
   <div class="support-grid">
-    <!-- Left Column - National Hotlines -->
+
+    <!-- Left — National Hotlines -->
     <div>
       <span class="section-tag">National hotlines</span>
       <div class="hotline-list">
@@ -261,46 +54,45 @@
           <a href="tel:10111" class="call-btn red">10111</a>
         </div>
 
-        <!-- Add Contact Card (last in the national hotlines list) -->
+        <!-- Add Contact -->
         <div class="add-contact-card" id="openModalBtn">
           <div class="add-contact-content">
             <div class="add-contact-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </div>
             <div class="add-contact-text">
               <h4>Add Emergency Contact</h4>
               <p>Save a trusted person for instant speed-dial access</p>
             </div>
           </div>
-          <div style="font-size: 1.5rem; color: #64748b;">→</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted)"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
-    </div><!-- end left col -->
+    </div>
 
-    <!-- Right Column - Nearby Support Centres -->
+    <!-- Right — Nearby Support Centres -->
     <div>
       <span class="section-tag">Nearby support centres</span>
       <div class="nearby-list" id="nearbyDynamicList">
-        <div class="loading-spinner">📍 Detecting your location...</div>
+        <div class="loading-spinner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Detecting your location...
+        </div>
       </div>
-    </div><!-- end right col -->
-  </div><!-- end support-grid -->
+    </div>
+
+  </div>
 </div>
 
-<!-- Dynamic Overlay Modal Overlay Form Module -->
+<!-- Add Contact Modal -->
 <div class="contact-modal" id="contactModal">
   <div class="modal-content">
     <h3 class="modal-title">Add Emergency Contact</h3>
     <form class="modal-form" id="personalContactForm">
       <label for="contactName">Contact Name</label>
       <input type="text" id="contactName" placeholder="e.g., Mom, Best Friend, Roommate" required />
-      
       <label for="contactPhone">Phone Number</label>
       <input type="tel" id="contactPhone" placeholder="e.g., 082 123 4567" required />
-      
       <div class="modal-actions">
         <button type="button" class="cancel-btn" id="closeModalBtn">Cancel</button>
         <button type="submit" class="add-btn">Save Contact</button>
@@ -311,314 +103,5 @@
 
 <script src="{% static 'enduser/js/nav.js' %}"></script>
 <script src="{% static 'enduser/js/support.js' %}"></script>
-
-<script>
-  // ========== PERSONAL CONTACTS ==========
-  document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('contactModal');
-    const openModalBtn = document.getElementById('openModalBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const form = document.getElementById('personalContactForm');
-    const listContainer = document.getElementById('personalContactList');
-
-    let personalContacts = JSON.parse(localStorage.getItem('chomi_personal_contacts')) || [];
-
-    openModalBtn.addEventListener('click', () => modal.style.display = 'flex');
-    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
-    
-    window.addEventListener('click', (e) => {
-      if (e.target === modal) modal.style.display = 'none';
-    });
-
-    const escapeHTML = (str) => {
-      if (!str) return '';
-      return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-      );
-    };
-
-    const saveAndRender = () => {
-      localStorage.setItem('chomi_personal_contacts', JSON.stringify(personalContacts));
-      renderContacts();
-    };
-
-    const renderContacts = () => {
-      listContainer.innerHTML = '';
-      
-      if (personalContacts.length === 0) {
-        listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #64748b; border: 1px dashed #cbd5e1; border-radius: 12px;">No speed dial contacts yet. Use "Add Emergency Contact" below to save someone you trust.</div>';
-        return;
-      }
-      
-      personalContacts.forEach((contact, index) => {
-        const card = document.createElement('div');
-        card.className = 'personal-contact-card';
-        card.innerHTML = `
-          <div class="h-icon h-blue">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <div class="hotline-info">
-            <p class="hotline-name">⭐ ${escapeHTML(contact.name)}</p>
-            <p class="hotline-desc">Your Personal Speed-Dial</p>
-          </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <a href="tel:${contact.phone}" class="call-btn">${escapeHTML(contact.phone)}</a>
-            <button class="delete-btn" data-index="${index}" title="Remove contact">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        `;
-        listContainer.appendChild(card);
-      });
-      
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const idx = btn.getAttribute('data-index');
-          personalContacts.splice(idx, 1);
-          saveAndRender();
-        });
-      });
-    };
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nameInput = document.getElementById('contactName');
-      const phoneInput = document.getElementById('contactPhone');
-
-      const newContact = {
-        name: nameInput.value.trim(),
-        phone: phoneInput.value.trim()
-      };
-
-      if (newContact.name && newContact.phone) {
-        personalContacts.push(newContact);
-        saveAndRender();
-        nameInput.value = '';
-        phoneInput.value = '';
-        modal.style.display = 'none';
-      }
-    });
-
-    renderContacts();
-  });
-
-  // ========== BIZDATA API NEARBY SEARCH (FREE, NO API KEY) ==========
-  
-  // Haversine formula: calculate distance between two coordinates in kilometers
-  function haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  }
-  
-  function escapeHTML(str) {
-    if (!str) return '';
-    return str.replace(/[&<>'"]/g, 
-      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
-  }
-  
-  // Render nearby centers to the page
-  function renderNearbyCenters(centers, userLat, userLng) {
-    const container = document.getElementById('nearbyDynamicList');
-    if (!container) return;
-    
-    if (!centers || centers.length === 0) {
-      container.innerHTML = `
-        <div class="error-message">
-          ⚠️ No nearby mental health support found in your area.<br><br>
-          Please try these options:<br>
-          • Call SADAG: <strong>0800 456 789</strong><br>
-          • Check back later as we add more facilities<br><br>
-          <button onclick="location.reload()" class="retry-btn">🔄 Try Again</button>
-        </div>`;
-      return;
-    }
-    
-    container.innerHTML = '';
-    
-    for(let center of centers) {
-      const name = center.name || center.business_name || 'Mental Health Support Center';
-      const address = center.address || center.full_address || 'Address available on map';
-      const lat = center.latitude || center.lat;
-      const lng = center.longitude || center.lng;
-      const phone = center.phone || null;
-      
-      let distance = 'Unknown';
-      if (lat && lng && userLat && userLng) {
-        const distKm = haversineDistance(userLat, userLng, parseFloat(lat), parseFloat(lng));
-        distance = distKm < 1 ? `${Math.round(distKm * 1000)} m away` : `${distKm.toFixed(1)} km away`;
-      }
-      
-      const mapsLink = lat && lng ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}+${encodeURIComponent(address)}`;
-      
-      const card = document.createElement('div');
-      card.className = 'nearby-card';
-      card.innerHTML = `
-        <div class="h-icon h-purple">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-        <div class="nearby-info">
-          <p class="nearby-name">${escapeHTML(name)} <span class="distance-badge">${distance}</span></p>
-          <p class="nearby-addr">${escapeHTML(address.substring(0, 80))}${address.length > 80 ? '...' : ''}</p>
-          ${phone ? `<a href="tel:${escapeHTML(phone)}" class="phone-link">📞 ${escapeHTML(phone)}</a>` : ''}
-        </div>
-        <a href="${mapsLink}" target="_blank" rel="noopener noreferrer" class="dir-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
-      `;
-      container.appendChild(card);
-    }
-  }
-  
-  // Get city name from coordinates using OpenStreetMap Nominatim (free, no API key)
-  async function getCityFromCoords(lat, lng) {
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`);
-      const data = await response.json();
-      return data.address.city || data.address.town || data.address.suburb || data.address.state || "South Africa";
-    } catch (error) {
-      console.error("Error getting city:", error);
-      return "South Africa";
-    }
-  }
-  
-  // Search for facilities using BizData API
-  async function searchBizData(city, userLat, userLng) {
-    const container = document.getElementById('nearbyDynamicList');
-    container.innerHTML = '<div class="loading-spinner">🔍 Searching for hospitals, clinics, and counselors near ' + escapeHTML(city) + '...</div>';
-    
-    // Categories that might have mental health support
-    const categories = ['hospital', 'doctor', 'pharmacy', 'clinic', 'healthcare', 'therapy'];
-    let allResults = [];
-    
-    for (const category of categories) {
-      try {
-        const url = `https://bizdata-web.vercel.app/api/businesses?location=${encodeURIComponent(city)}&category=${category}&limit=20`;
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.businesses && data.businesses.length) {
-          // Filter for mental health related keywords
-          const mentalHealthKeywords = ['mental', 'psych', 'counsel', 'therapy', 'wellness', 'health', 'clinic', 'hospital', 'medical', 'care'];
-          const filtered = data.businesses.filter(biz => {
-            const name = (biz.name || '').toLowerCase();
-            const categoryName = (biz.category || '').toLowerCase();
-            return mentalHealthKeywords.some(keyword => name.includes(keyword) || categoryName.includes(keyword));
-          });
-          allResults.push(...filtered);
-        }
-      } catch (error) {
-        console.error(`Error fetching ${category}:`, error);
-      }
-    }
-    
-    // Remove duplicates by name/coordinates
-    const unique = [];
-    const seen = new Set();
-    for (const biz of allResults) {
-      const key = `${biz.name}-${biz.latitude}-${biz.longitude}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(biz);
-      }
-    }
-    
-    if (unique.length === 0) {
-      // Fallback: try without category filter
-      try {
-        const fallbackUrl = `https://bizdata-web.vercel.app/api/businesses?location=${encodeURIComponent(city)}&limit=30`;
-        const fallbackResponse = await fetch(fallbackUrl);
-        const fallbackData = await fallbackResponse.json();
-        
-        if (fallbackData.businesses && fallbackData.businesses.length) {
-          const healthRelated = fallbackData.businesses.filter(biz => {
-            const name = (biz.name || '').toLowerCase();
-            const category = (biz.category || '').toLowerCase();
-            return name.includes('health') || name.includes('clinic') || name.includes('hospital') || 
-                   category.includes('health') || category.includes('clinic') || category.includes('hospital');
-          });
-          if (healthRelated.length) {
-            renderNearbyCenters(healthRelated.slice(0, 10), userLat, userLng);
-            return;
-          }
-        }
-      } catch (e) {
-        console.error("Fallback error:", e);
-      }
-      
-      container.innerHTML = `
-        <div class="error-message">
-          ⚠️ No mental health facilities found in ${escapeHTML(city)}.<br><br>
-          <strong>Immediate Help Available:</strong><br>
-          • SADAG 24hr Crisis Line: <a href="tel:0800456789" style="color:#dc2626;">0800 456 789</a><br>
-          • Lifeline SA: <a href="tel:0861322322" style="color:#2563eb;">0861 322 322</a><br><br>
-          <button onclick="location.reload()" class="retry-btn">🔄 Try Again</button>
-        </div>`;
-      return;
-    }
-    
-    // Sort by distance and take closest 5
-    const withDistances = unique.map(place => ({
-      ...place,
-      distance: (place.latitude && place.longitude) ? 
-        haversineDistance(userLat, userLng, parseFloat(place.latitude), parseFloat(place.longitude)) : 9999
-    })).sort((a,b) => a.distance - b.distance).slice(0, 6);
-    
-    renderNearbyCenters(withDistances, userLat, userLng);
-  }
-  
-  // Main function: get location and find nearby support
-  async function findNearbySupport() {
-    const container = document.getElementById('nearbyDynamicList');
-    container.innerHTML = '<div class="loading-spinner">📍 Requesting your location...</div>';
-    
-    if (!navigator.geolocation) {
-      container.innerHTML = '<div class="error-message">Geolocation is not supported by your browser. Please enable location services or contact SADAG at 0800 456 789 for support.</div>';
-      return;
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-        
-        try {
-          const city = await getCityFromCoords(userLat, userLng);
-          await searchBizData(city, userLat, userLng);
-        } catch (error) {
-          console.error("Search error:", error);
-          container.innerHTML = '<div class="error-message">Unable to fetch nearby resources. Please call SADAG at 0800 456 789 for immediate support.<br><br><button onclick="location.reload()" class="retry-btn">Try Again</button></div>';
-        }
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        let errorMsg = "Unable to get your location. ";
-        if (error.code === 1) errorMsg = "Location access denied. ";
-        else if (error.code === 2) errorMsg = "Location unavailable. ";
-        else if (error.code === 3) errorMsg = "Location request timed out. ";
-        
-        container.innerHTML = `<div class="error-message">${errorMsg}Please call SADAG at <strong>0800 456 789</strong> for immediate support.<br><br><button onclick="location.reload()" class="retry-btn">Try Again</button></div>`;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  }
-  
-  // Start the location search when page loads
-  document.addEventListener('DOMContentLoaded', () => {
-    findNearbySupport();
-  });
-</script>
 </body>
 </html>
