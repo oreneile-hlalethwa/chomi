@@ -33,4 +33,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('dashboard/admin/',     views.admin_portal_view,        name='admin_portal'),
     path('dashboard/research/',  views.research_dashboard_view,  name='research_dashboard'),
+    path('api/admin/stats/',                  views.admin_stats,       name='admin_stats'),
+    path('api/admin/users/',                  views.admin_users,       name='admin_users'),
+    path('api/admin/users/<int:user_id>/verify/', views.admin_verify_user, name='admin_verify_user'),
 ]

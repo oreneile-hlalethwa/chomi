@@ -214,7 +214,8 @@ const LOGGED_IN_USER = {
   last:         "{{ user.last_name }}",
   email:        "{{ user.email }}",
   phone:        "{{ user.phone_number }}",
-  is_anonymous: {{ user.is_anonymous|lower }}
+  is_anonymous: {{ user.is_anonymous|lower }},
+  is_verified:  {{ user.is_verified|lower }}
 };
 </script>
 </body>

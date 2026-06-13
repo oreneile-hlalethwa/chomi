@@ -33,7 +33,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_anonymous = models.BooleanField(default=True)
     is_active    = models.BooleanField(default=True)
     is_staff     = models.BooleanField(default=False)
+    is_verified  = models.BooleanField(default=False)
     date_joined  = models.DateTimeField(auto_now_add=True)
+    last_login   = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD  = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -45,7 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
-    
+
+
 class MoodCheckIn(models.Model):
     MOOD_CHOICES = [
         ('calm', 'Calm'),
@@ -76,7 +79,8 @@ class MoodCheckIn(models.Model):
 
     def __str__(self):
         return f'{self.user.email} — {self.mood} — {self.timestamp}'
-    
+
+
 class LiteracyRecommendation(models.Model):
     user         = models.ForeignKey(User, on_delete=models.CASCADE, related_name='literacy')
     title        = models.CharField(max_length=200)
@@ -89,7 +93,8 @@ class LiteracyRecommendation(models.Model):
 
     def __str__(self):
         return f'{self.user.email} — {self.title}'
-    
+
+
 class ChatMessage(models.Model):
     SENDER_CHOICES = [
         ('user',  'User'),
@@ -105,7 +110,8 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f'{self.user.email} — {self.sender} — {self.timestamp}'
-    
+
+
 class Conversation(models.Model):
     participants = models.ManyToManyField(User, related_name='conversations')
     created_at   = models.DateTimeField(auto_now_add=True)
@@ -136,11 +142,12 @@ class Message(models.Model):
 
     def __str__(self):
         return f'{self.sender.email}: {self.content[:50]}'
-    
+
+
 class EmergencyContact(models.Model):
-    user  = models.ForeignKey(User, on_delete=models.CASCADE, related_name='emergency_contacts')
-    name  = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='emergency_contacts')
+    name       = models.CharField(max_length=100)
+    phone      = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

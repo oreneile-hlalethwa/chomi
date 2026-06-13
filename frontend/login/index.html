@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chomi – Get Started</title>
+  <title>ChomiHub – Get Started</title>
   <link rel="stylesheet" href="{% static 'login/css/login.css' %}" />
 </head>
 <body>
@@ -12,6 +12,7 @@
 <!-- ══ SPLASH ══ -->
 <div id="splash">
   <div class="splash-inner">
+    <p class="splash-by">Chomi by ChomiHub</p>
     <h1 class="splash-title">chomi<span class="gold">.</span></h1>
     <p class="splash-sub">Healthy life is having a healthy mind, so build a healthy mind then the healthy body.</p>
     <button class="get-started-btn" onclick="startLoading()">Get Started</button>
@@ -55,6 +56,7 @@
           Works offline
         </li>
       </ul>
+      <p class="side-brand">A ChomiHub product</p>
     </div>
   </div>
 
@@ -209,7 +211,6 @@
 <script src="{% static 'login/js/login.js' %}"></script>
 
 <script>
-  // Auto show auth panel if there are errors or active_tab is set
   {% if show_auth %}
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('splash').style.display = 'none';
@@ -223,6 +224,20 @@
 </script>
 
 <style>
+.splash-by {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 0.5rem;
+    font-family: var(--font-body, sans-serif);
+  }
+  .side-brand {
+    margin-top: auto;
+    padding-top: 2rem;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.08em;
+  }
   .alert-msg {
     padding: 0.75rem 1rem;
     border-radius: 10px;

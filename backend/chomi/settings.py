@@ -71,17 +71,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR.parent / 'frontend',
-]
+STATICFILES_DIRS = [BASE_DIR.parent / 'frontend']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Johannesburg'
 USE_I18N = True
 USE_TZ = True
-
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR.parent / 'frontend']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

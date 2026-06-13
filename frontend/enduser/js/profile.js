@@ -26,7 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function setRealName() {
     const full     = `${LOGGED_IN_USER.first} ${LOGGED_IN_USER.last}`;
     const initials = `${LOGGED_IN_USER.first[0]}${LOGGED_IN_USER.last[0]}`;
-    profileName.textContent = full;
+    const verifiedBadge = LOGGED_IN_USER.is_verified
+      ? ` <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="none" style="vertical-align:middle"><circle cx="12" cy="12" r="10" fill="var(--accent)"/><polyline points="9 12 11 14 15 10" stroke="white" stroke-width="2" fill="none"/></svg>`
+      : '';
+    profileName.innerHTML   = full + verifiedBadge;
     profileSub.textContent  = 'Public profile · Identity visible';
     profileAvatar.innerHTML = `<span style="font-family:var(--font-display);font-size:1.5rem;font-weight:400;color:var(--accent);">${initials}</span>`;
     anonSubText.textContent = 'Your real name is visible to others';
@@ -88,15 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('statStreak').textContent  = streakCount || '0';
       document.getElementById('statCheckins').textContent = checkinCount || '0';
       if (topMood) {
-  const moodIcons = {
-    good:     `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
-    calm:     `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
-    stressed: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="8" x2="9.01" y2="8"/><line x1="15" y1="8" x2="15.01" y2="8"/><path d="M8 4l2 2"/><path d="M16 4l-2 2"/></svg>`,
-    low:      `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
-    sad:      `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M12 17v1"/></svg>`,
-  };
-  document.getElementById('statMood').innerHTML = moodIcons[topMood] || topMood;
-}
+        const moodEmoji = { good:'😊', calm:'😌', stressed:'😰', low:'😔', sad:'😢' };
+        document.getElementById('statMood').textContent = moodEmoji[topMood] || topMood;
+      }
     } catch { console.log('Could not load mood history'); }
   }
   loadMoodHistory();

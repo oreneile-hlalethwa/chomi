@@ -11,7 +11,7 @@ from .claude_service import (
     get_literacy_recommendations
 )
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db import models
 
@@ -103,16 +103,12 @@ def forgot_password_view(request):
 
 @login_required(login_url='login')
 def home_view(request):
-    return render(request, 'enduser/home.html', {
-        'user': request.user,
-    })
+    return render(request, 'enduser/home.html', {'user': request.user})
 
 
 @login_required(login_url='login')
 def inbox_view(request):
-    return render(request, 'enduser/inbox.html', {
-        'user': request.user,
-    })
+    return render(request, 'enduser/inbox.html', {'user': request.user})
 
 
 @login_required(login_url='login')
@@ -127,16 +123,28 @@ def support_view(request):
 
 @login_required(login_url='login')
 def profile_view(request):
-    return render(request, 'enduser/profile.html', {
-        'user': request.user,
-    })
+    return render(request, 'enduser/profile.html', {'user': request.user})
 
 
 @login_required(login_url='login')
 def dashboard_view(request):
     if not request.user.is_staff:
         return redirect('home')
-    return render(request, 'customer/admin.html')
+    return render(request, 'customer/landing.html', {'user': request.user})
+
+
+@login_required(login_url='login')
+def admin_portal_view(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    return render(request, 'customer/index.html', {'user': request.user})
+
+
+@login_required(login_url='login')
+def research_dashboard_view(request):
+    if not request.user.is_staff:
+        return redirect('home')
+    return render(request, 'customer/dashboard.html', {'user': request.user})
 
 
 @login_required(login_url='login')
@@ -183,22 +191,15 @@ def submit_checkin(request):
     ).values('mood', 'user_message')[:3]
     history = [f"{r['mood']}: {r['user_message']}" for r in recent]
 
-    ai_response = get_mood_response(
-        mood, chip, user_message,
-        request.user.first_name, history
-    )
-
-    topics = detect_topics(mood, chip, user_message)
+    ai_response = get_mood_response(mood, chip, user_message, request.user.first_name, history)
+    topics      = detect_topics(mood, chip, user_message)
 
     score_map = {'good': 5, 'calm': 4, 'stressed': 2, 'low': 2, 'sad': 1}
     MoodCheckIn.objects.create(
-        user=request.user,
-        mood=mood,
+        user=request.user, mood=mood,
         mood_score=score_map.get(mood, 3),
-        chip_selected=chip,
-        user_message=user_message,
-        ai_response=ai_response,
-        topics=topics,
+        chip_selected=chip, user_message=user_message,
+        ai_response=ai_response, topics=topics,
     )
 
     display_msg = f"{chip} — {user_message}" if chip and user_message else chip or user_message
@@ -208,10 +209,7 @@ def submit_checkin(request):
 
     try:
         all_topics  = list(MoodCheckIn.objects.filter(user=request.user).values_list('topics', flat=True))
-        flat_topics = list(set([
-            t for sublist in all_topics
-            for t in (sublist if isinstance(sublist, list) else [])
-        ]))[:5]
+        flat_topics = list(set([t for sublist in all_topics for t in (sublist if isinstance(sublist, list) else [])]))[:5]
         if not flat_topics:
             flat_topics = [mood]
         recs = get_literacy_recommendations(request.user.first_name, flat_topics)
@@ -236,10 +234,7 @@ def get_mood_history(request):
     days  = []
     for i in range(6, -1, -1):
         day     = today - timedelta(days=i)
-        checkin = MoodCheckIn.objects.filter(
-            user=request.user,
-            timestamp__date=day
-        ).first()
+        checkin = MoodCheckIn.objects.filter(user=request.user, timestamp__date=day).first()
         days.append({
             'day':   day.strftime('%a'),
             'score': checkin.mood_score if checkin else 0,
@@ -265,27 +260,19 @@ def continue_chat(request):
         user=request.user,
         timestamp__gte=timezone.now() - timedelta(days=7)
     ).values('mood', 'user_message', 'ai_response')[:3]
-    history = [f"{r['mood']}: {r['user_message']}" for r in recent]
-
-    ai_response = get_mood_response(
-        'chat', '', user_message,
-        request.user.first_name, history
-    )
+    history     = [f"{r['mood']}: {r['user_message']}" for r in recent]
+    ai_response = get_mood_response('chat', '', user_message, request.user.first_name, history)
 
     ChatMessage.objects.create(user=request.user, sender='user',  message=user_message)
     ChatMessage.objects.create(user=request.user, sender='chomi', message=ai_response)
-
     return JsonResponse({'ai_response': ai_response})
 
 
 @login_required(login_url='login')
 def get_chat_history(request):
     today = timezone.now().date()
-    msgs  = ChatMessage.objects.filter(
-        user=request.user,
-        timestamp__date=today
-    )
-    data = [{'sender': m.sender, 'message': m.message, 'time': m.timestamp.strftime('%H:%M')} for m in msgs]
+    msgs  = ChatMessage.objects.filter(user=request.user, timestamp__date=today)
+    data  = [{'sender': m.sender, 'message': m.message, 'time': m.timestamp.strftime('%H:%M')} for m in msgs]
     return JsonResponse({'messages': data})
 
 
@@ -295,22 +282,21 @@ def search_users(request):
     if len(query) < 1:
         return JsonResponse({'users': []})
     users = User.objects.filter(
-        is_active=True,
-        is_anonymous=False
+        is_active=True, is_anonymous=False
     ).filter(
-        models.Q(first_name__icontains=query) |
-        models.Q(last_name__icontains=query)
+        models.Q(first_name__icontains=query) | models.Q(last_name__icontains=query)
     ).exclude(id=request.user.id)[:10]
 
     data = []
     for u in users:
         data.append({
-            'id':       u.id,
-            'name':     u.get_full_name(),
-            'initials': (u.first_name[0] + u.last_name[0]).upper(),
-            'is_anon':  False,
-            'joined':   u.date_joined.strftime('%b %Y'),
-            'email':    u.email,
+            'id':          u.id,
+            'name':        u.get_full_name(),
+            'initials':    (u.first_name[0] + u.last_name[0]).upper(),
+            'is_anon':     False,
+            'is_verified': u.is_verified,
+            'joined':      u.date_joined.strftime('%b %Y'),
+            'email':       u.email,
         })
     return JsonResponse({'users': data})
 
@@ -326,14 +312,15 @@ def get_conversations(request):
             continue
         unread = c.messages.filter(read=False).exclude(sender=request.user).count()
         data.append({
-            'id':       c.id,
-            'other_id': other.id,
-            'name':     'Anonymous' if other.is_anonymous else other.get_full_name(),
-            'initials': 'AN' if other.is_anonymous else (other.first_name[0] + other.last_name[0]).upper(),
-            'is_anon':  other.is_anonymous,
-            'last_msg': last_msg.content[:60],
-            'time':     last_msg.timestamp.strftime('%H:%M'),
-            'unread':   unread,
+            'id':          c.id,
+            'other_id':    other.id,
+            'name':        'Anonymous' if other.is_anonymous else other.get_full_name(),
+            'initials':    'AN' if other.is_anonymous else (other.first_name[0] + other.last_name[0]).upper(),
+            'is_anon':     other.is_anonymous,
+            'is_verified': other.is_verified,
+            'last_msg':    last_msg.content[:60],
+            'time':        last_msg.timestamp.strftime('%H:%M'),
+            'unread':      unread,
         })
     return JsonResponse({'conversations': data})
 
@@ -382,13 +369,14 @@ def get_user_profile(request, user_id):
     u        = get_object_or_404(User, id=user_id)
     checkins = MoodCheckIn.objects.filter(user=u).count()
     return JsonResponse({
-        'id':       u.id,
-        'name':     'Anonymous' if u.is_anonymous else u.get_full_name(),
-        'initials': 'AN' if u.is_anonymous else (u.first_name[0] + u.last_name[0]).upper(),
-        'is_anon':  u.is_anonymous,
-        'joined':   u.date_joined.strftime('%B %Y'),
-        'checkins': checkins,
-        'email':    '' if u.is_anonymous else u.email,
+        'id':          u.id,
+        'name':        'Anonymous' if u.is_anonymous else u.get_full_name(),
+        'initials':    'AN' if u.is_anonymous else (u.first_name[0] + u.last_name[0]).upper(),
+        'is_anon':     u.is_anonymous,
+        'is_verified': u.is_verified,
+        'joined':      u.date_joined.strftime('%B %Y'),
+        'checkins':    checkins,
+        'email':       '' if u.is_anonymous else u.email,
     })
 
 
@@ -490,20 +478,225 @@ def delete_emergency_contact(request, contact_id):
     contact.delete()
     return JsonResponse({'status': 'ok'})
 
-@login_required(login_url='login')
-def dashboard_view(request):
-    if not request.user.is_staff:
-        return redirect('home')
-    return render(request, 'customer/landing.html', {'user': request.user})
+
+# ══════════════════════════════
+# ADMIN VIEWS
+# ══════════════════════════════
 
 @login_required(login_url='login')
-def admin_portal_view(request):
+def admin_stats(request):
     if not request.user.is_staff:
-        return redirect('home')
-    return render(request, 'customer/index.html')
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    today = timezone.now().date()
+    non_staff = User.objects.filter(is_staff=False)
+
+    # ── Basic counts ──
+    total_accounts = non_staff.count()
+    active_users   = non_staff.filter(is_active=True).count()
+    total_checkins = MoodCheckIn.objects.count()
+
+    # ── Mood distribution ──
+    mood_dist = {}
+    for mood, _ in MoodCheckIn.MOOD_CHOICES:
+        mood_dist[mood] = MoodCheckIn.objects.filter(mood=mood).count()
+
+    # ── Signups over last 30 days ──
+    signups = []
+    for i in range(29, -1, -1):
+        day   = today - timedelta(days=i)
+        count = non_staff.filter(date_joined__date=day).count()
+        signups.append({'label': day.strftime('%d %b'), 'count': count})
+
+    # ── Active users by day of week (check-ins per weekday) ──
+    day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    active_by_day = [0] * 7
+    checkins_90 = MoodCheckIn.objects.filter(
+        timestamp__gte=timezone.now() - timedelta(days=90)
+    )
+    for c in checkins_90:
+        active_by_day[c.timestamp.weekday()] += 1
+    active_by_day_data = [{'day': day_names[i], 'count': active_by_day[i]} for i in range(7)]
+
+    # ── Screen time by day (avg chat messages per day last 7 days) ──
+    screen_time = []
+    for i in range(6, -1, -1):
+        day   = today - timedelta(days=i)
+        count = ChatMessage.objects.filter(timestamp__date=day, sender='user').count()
+        # Approximate: each message ~ 2 min of engagement
+        mins  = count * 2
+        screen_time.append({'day': day.strftime('%a'), 'mins': mins})
+
+    # ── New vs returning (last 6 months) ──
+    new_vs_returning = []
+    for i in range(5, -1, -1):
+        month_start = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
+        month_end   = (month_start + timedelta(days=32)).replace(day=1)
+        new_users   = non_staff.filter(
+            date_joined__date__gte=month_start,
+            date_joined__date__lt=month_end
+        ).count()
+        returning   = MoodCheckIn.objects.filter(
+            timestamp__date__gte=month_start,
+            timestamp__date__lt=month_end
+        ).values('user').distinct().exclude(
+            user__date_joined__date__gte=month_start
+        ).count()
+        new_vs_returning.append({
+            'label':     month_start.strftime('%b'),
+            'new':       new_users,
+            'returning': returning,
+        })
+
+    # ── Retention rate (last 12 weeks) ──
+    retention = []
+    for i in range(11, -1, -1):
+        week_start = today - timedelta(days=today.weekday() + i*7)
+        week_end   = week_start + timedelta(days=7)
+        users_that_week = MoodCheckIn.objects.filter(
+            timestamp__date__gte=week_start,
+            timestamp__date__lt=week_end
+        ).values('user').distinct().count()
+        returned_next = MoodCheckIn.objects.filter(
+            timestamp__date__gte=week_end,
+            timestamp__date__lt=week_end + timedelta(days=7)
+        ).values('user').distinct().count()
+        rate = round((returned_next / users_that_week * 100) if users_that_week else 0)
+        retention.append({'label': week_start.strftime('%d %b'), 'rate': rate})
+
+    # ── Streak distribution ──
+    streak_buckets = {'1 day': 0, '2-3': 0, '4-7': 0, '8-14': 0, '15-30': 0, '30+': 0}
+    for u in non_staff:
+        streak = 0
+        for j in range(30):
+            day = today - timedelta(days=j)
+            if MoodCheckIn.objects.filter(user=u, timestamp__date=day).exists():
+                streak += 1
+            else:
+                break
+        if streak == 1:    streak_buckets['1 day'] += 1
+        elif streak <= 3:  streak_buckets['2-3']   += 1
+        elif streak <= 7:  streak_buckets['4-7']   += 1
+        elif streak <= 14: streak_buckets['8-14']  += 1
+        elif streak <= 30: streak_buckets['15-30'] += 1
+        elif streak > 30:  streak_buckets['30+']   += 1
+
+    total_with_streak = sum(streak_buckets.values()) or 1
+    streak_dist = [
+        {'label': k, 'pct': round(v / total_with_streak * 100)}
+        for k, v in streak_buckets.items()
+    ]
+
+    # ── Support visits ──
+    support_visits = ChatMessage.objects.filter(
+        message__icontains='support'
+    ).values('user').distinct().count()
+
+    # ── Retention rate (last 7 days) ──
+    week_ago = today - timedelta(days=7)
+    users_last_week = MoodCheckIn.objects.filter(
+        timestamp__date__gte=week_ago
+    ).values('user').distinct().count()
+    users_two_weeks = MoodCheckIn.objects.filter(
+        timestamp__date__gte=today - timedelta(days=14),
+        timestamp__date__lt=week_ago
+    ).values('user').distinct().count()
+    retention_rate = str(round((users_last_week / users_two_weeks * 100) if users_two_weeks else 0)) + '%'
+
+    # ── Gender distribution (real data) ──
+    gender_counts = {}
+    gender_labels = {
+        'female':      'Female',
+        'male':        'Male',
+        'non_binary':  'Non-binary',
+        'prefer_not':  'Prefer not to say',
+        '':            'Not specified',
+    }
+    for code, label in gender_labels.items():
+        count = non_staff.filter(gender=code).count()
+        if count > 0:
+            gender_counts[label] = count
+
+    # ── Anonymous vs public ──
+    anon_count   = non_staff.filter(is_anonymous=True).count()
+    public_count = non_staff.filter(is_anonymous=False).count()
+
+    return JsonResponse({
+        'total_accounts':    total_accounts,
+        'active_users':      active_users,
+        'total_checkins':    total_checkins,
+        'support_visits':    support_visits,
+        'retention_rate':    retention_rate,
+        'mood_distribution': mood_dist,
+        'signups_over_time': signups,
+        'active_by_day':     active_by_day_data,
+        'screen_time':       screen_time,
+        'new_vs_returning':  new_vs_returning,
+        'retention':         retention,
+        'streak_dist':       streak_dist,
+        'gender_distribution': gender_counts,
+        'anon_count':        anon_count,
+        'public_count':      public_count,
+    })
+
 
 @login_required(login_url='login')
-def research_dashboard_view(request):
+def admin_users(request):
     if not request.user.is_staff:
-        return redirect('home')
-    return render(request, 'customer/dashboard.html')
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    users = User.objects.filter(is_staff=False).order_by('-date_joined')
+    data  = []
+
+    for u in users:
+        checkins     = MoodCheckIn.objects.filter(user=u).count()
+        last_checkin = MoodCheckIn.objects.filter(user=u).first()
+
+        streak = 0
+        today  = timezone.now().date()
+        for i in range(30):
+            day = today - timedelta(days=i)
+            if MoodCheckIn.objects.filter(user=u, timestamp__date=day).exists():
+                streak += 1
+            else:
+                break
+
+        if last_checkin:
+            delta = (today - last_checkin.timestamp.date()).days
+            if delta == 0:   last_active = 'Today'
+            elif delta == 1: last_active = 'Yesterday'
+            else:            last_active = f'{delta} days ago'
+        else:
+            last_active = 'Never'
+
+        initials = (u.first_name[0] + u.last_name[0]).upper() if u.first_name and u.last_name else '??'
+
+        data.append({
+            'id':           u.id,
+            'first_name':   u.first_name,
+            'last_name':    u.last_name,
+            'email':        u.email,
+            'initials':     initials,
+            'is_active':    u.is_active,
+            'is_anonymous': u.is_anonymous,
+            'is_verified':  u.is_verified,
+            'date_joined':  u.date_joined.strftime('%b %Y'),
+            'checkins':     checkins,
+            'streak':       streak,
+            'last_active':  last_active,
+        })
+
+    return JsonResponse({'users': data})
+
+
+@login_required(login_url='login')
+@require_POST
+def admin_verify_user(request, user_id):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    from django.shortcuts import get_object_or_404
+    u = get_object_or_404(User, id=user_id)
+    u.is_verified = not u.is_verified
+    u.save()
+    return JsonResponse({'is_verified': u.is_verified})
