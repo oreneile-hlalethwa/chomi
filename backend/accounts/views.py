@@ -1,9 +1,11 @@
+import os
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django_ratelimit.decorators import ratelimit
 from .models import User, MoodCheckIn, LiteracyRecommendation, ChatMessage, Conversation, Message, EmergencyContact
 from .claude_service import (
     get_chips_for_mood, get_mood_followup,
@@ -16,6 +18,12 @@ from django.utils import timezone
 from django.db import models
 
 
+# ── RATE LIMIT HELPER ──
+def rate_limited_response(request, group=None, key=None):
+    return JsonResponse({'error': 'Too many requests. Please slow down.'}, status=429)
+
+
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff:
@@ -42,6 +50,7 @@ def login_view(request):
     return render(request, 'login/index.html')
 
 
+@ratelimit(key='ip', rate='3/m', method='POST', block=True)
 def signup_view(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -174,6 +183,7 @@ def get_mood_chips(request):
 
 @login_required(login_url='login')
 @require_POST
+@ratelimit(key='user', rate='10/m', block=True)
 def submit_checkin(request):
     today = timezone.now().date()
 
@@ -252,6 +262,7 @@ def get_literacy(request):
 
 @login_required(login_url='login')
 @require_POST
+@ratelimit(key='user', rate='20/m', block=True)
 def continue_chat(request):
     data         = json.loads(request.body)
     user_message = data.get('user_message', '')
@@ -277,6 +288,7 @@ def get_chat_history(request):
 
 
 @login_required(login_url='login')
+@ratelimit(key='user', rate='30/m', block=True)
 def search_users(request):
     query = request.GET.get('q', '').strip()
     if len(query) < 1:
@@ -337,6 +349,7 @@ def get_messages(request, conversation_id):
 
 @login_required(login_url='login')
 @require_POST
+@ratelimit(key='user', rate='20/m', block=True)
 def send_message(request):
     from django.shortcuts import get_object_or_404
     data     = json.loads(request.body)
@@ -382,6 +395,7 @@ def get_user_profile(request, user_id):
 
 @login_required(login_url='login')
 @require_POST
+@ratelimit(key='user', rate='20/m', block=True)
 def inbox_chomi_chat(request):
     data         = json.loads(request.body)
     user_message = data.get('message', '')
@@ -491,80 +505,52 @@ def admin_stats(request):
     today = timezone.now().date()
     non_staff = User.objects.filter(is_staff=False)
 
-    # ── Basic counts ──
     total_accounts = non_staff.count()
     active_users   = non_staff.filter(is_active=True).count()
     total_checkins = MoodCheckIn.objects.count()
 
-    # ── Mood distribution ──
     mood_dist = {}
     for mood, _ in MoodCheckIn.MOOD_CHOICES:
         mood_dist[mood] = MoodCheckIn.objects.filter(mood=mood).count()
 
-    # ── Signups over last 30 days ──
     signups = []
     for i in range(29, -1, -1):
         day   = today - timedelta(days=i)
         count = non_staff.filter(date_joined__date=day).count()
         signups.append({'label': day.strftime('%d %b'), 'count': count})
 
-    # ── Active users by day of week (check-ins per weekday) ──
     day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     active_by_day = [0] * 7
-    checkins_90 = MoodCheckIn.objects.filter(
-        timestamp__gte=timezone.now() - timedelta(days=90)
-    )
+    checkins_90 = MoodCheckIn.objects.filter(timestamp__gte=timezone.now() - timedelta(days=90))
     for c in checkins_90:
         active_by_day[c.timestamp.weekday()] += 1
     active_by_day_data = [{'day': day_names[i], 'count': active_by_day[i]} for i in range(7)]
 
-    # ── Screen time by day (avg chat messages per day last 7 days) ──
     screen_time = []
     for i in range(6, -1, -1):
         day   = today - timedelta(days=i)
         count = ChatMessage.objects.filter(timestamp__date=day, sender='user').count()
-        # Approximate: each message ~ 2 min of engagement
-        mins  = count * 2
-        screen_time.append({'day': day.strftime('%a'), 'mins': mins})
+        screen_time.append({'day': day.strftime('%a'), 'mins': count * 2})
 
-    # ── New vs returning (last 6 months) ──
     new_vs_returning = []
     for i in range(5, -1, -1):
         month_start = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
         month_end   = (month_start + timedelta(days=32)).replace(day=1)
-        new_users   = non_staff.filter(
-            date_joined__date__gte=month_start,
-            date_joined__date__lt=month_end
-        ).count()
+        new_users   = non_staff.filter(date_joined__date__gte=month_start, date_joined__date__lt=month_end).count()
         returning   = MoodCheckIn.objects.filter(
-            timestamp__date__gte=month_start,
-            timestamp__date__lt=month_end
-        ).values('user').distinct().exclude(
-            user__date_joined__date__gte=month_start
-        ).count()
-        new_vs_returning.append({
-            'label':     month_start.strftime('%b'),
-            'new':       new_users,
-            'returning': returning,
-        })
+            timestamp__date__gte=month_start, timestamp__date__lt=month_end
+        ).values('user').distinct().exclude(user__date_joined__date__gte=month_start).count()
+        new_vs_returning.append({'label': month_start.strftime('%b'), 'new': new_users, 'returning': returning})
 
-    # ── Retention rate (last 12 weeks) ──
     retention = []
     for i in range(11, -1, -1):
         week_start = today - timedelta(days=today.weekday() + i*7)
         week_end   = week_start + timedelta(days=7)
-        users_that_week = MoodCheckIn.objects.filter(
-            timestamp__date__gte=week_start,
-            timestamp__date__lt=week_end
-        ).values('user').distinct().count()
-        returned_next = MoodCheckIn.objects.filter(
-            timestamp__date__gte=week_end,
-            timestamp__date__lt=week_end + timedelta(days=7)
-        ).values('user').distinct().count()
+        users_that_week = MoodCheckIn.objects.filter(timestamp__date__gte=week_start, timestamp__date__lt=week_end).values('user').distinct().count()
+        returned_next   = MoodCheckIn.objects.filter(timestamp__date__gte=week_end, timestamp__date__lt=week_end + timedelta(days=7)).values('user').distinct().count()
         rate = round((returned_next / users_that_week * 100) if users_that_week else 0)
         retention.append({'label': week_start.strftime('%d %b'), 'rate': rate})
 
-    # ── Streak distribution ──
     streak_buckets = {'1 day': 0, '2-3': 0, '4-7': 0, '8-14': 0, '15-30': 0, '30+': 0}
     for u in non_staff:
         streak = 0
@@ -582,61 +568,41 @@ def admin_stats(request):
         elif streak > 30:  streak_buckets['30+']   += 1
 
     total_with_streak = sum(streak_buckets.values()) or 1
-    streak_dist = [
-        {'label': k, 'pct': round(v / total_with_streak * 100)}
-        for k, v in streak_buckets.items()
-    ]
+    streak_dist = [{'label': k, 'pct': round(v / total_with_streak * 100)} for k, v in streak_buckets.items()]
 
-    # ── Support visits ──
-    support_visits = ChatMessage.objects.filter(
-        message__icontains='support'
-    ).values('user').distinct().count()
+    support_visits = ChatMessage.objects.filter(message__icontains='support').values('user').distinct().count()
 
-    # ── Retention rate (last 7 days) ──
-    week_ago = today - timedelta(days=7)
-    users_last_week = MoodCheckIn.objects.filter(
-        timestamp__date__gte=week_ago
-    ).values('user').distinct().count()
-    users_two_weeks = MoodCheckIn.objects.filter(
-        timestamp__date__gte=today - timedelta(days=14),
-        timestamp__date__lt=week_ago
-    ).values('user').distinct().count()
-    retention_rate = str(round((users_last_week / users_two_weeks * 100) if users_two_weeks else 0)) + '%'
+    week_ago        = today - timedelta(days=7)
+    users_last_week = MoodCheckIn.objects.filter(timestamp__date__gte=week_ago).values('user').distinct().count()
+    users_two_weeks = MoodCheckIn.objects.filter(timestamp__date__gte=today - timedelta(days=14), timestamp__date__lt=week_ago).values('user').distinct().count()
+    retention_rate  = str(round((users_last_week / users_two_weeks * 100) if users_two_weeks else 0)) + '%'
 
-    # ── Gender distribution (real data) ──
+    gender_labels = {'female': 'Female', 'male': 'Male', 'non_binary': 'Non-binary', 'prefer_not': 'Prefer not to say', '': 'Not specified'}
     gender_counts = {}
-    gender_labels = {
-        'female':      'Female',
-        'male':        'Male',
-        'non_binary':  'Non-binary',
-        'prefer_not':  'Prefer not to say',
-        '':            'Not specified',
-    }
     for code, label in gender_labels.items():
         count = non_staff.filter(gender=code).count()
         if count > 0:
             gender_counts[label] = count
 
-    # ── Anonymous vs public ──
     anon_count   = non_staff.filter(is_anonymous=True).count()
     public_count = non_staff.filter(is_anonymous=False).count()
 
     return JsonResponse({
-        'total_accounts':    total_accounts,
-        'active_users':      active_users,
-        'total_checkins':    total_checkins,
-        'support_visits':    support_visits,
-        'retention_rate':    retention_rate,
-        'mood_distribution': mood_dist,
-        'signups_over_time': signups,
-        'active_by_day':     active_by_day_data,
-        'screen_time':       screen_time,
-        'new_vs_returning':  new_vs_returning,
-        'retention':         retention,
-        'streak_dist':       streak_dist,
+        'total_accounts':      total_accounts,
+        'active_users':        active_users,
+        'total_checkins':      total_checkins,
+        'support_visits':      support_visits,
+        'retention_rate':      retention_rate,
+        'mood_distribution':   mood_dist,
+        'signups_over_time':   signups,
+        'active_by_day':       active_by_day_data,
+        'screen_time':         screen_time,
+        'new_vs_returning':    new_vs_returning,
+        'retention':           retention,
+        'streak_dist':         streak_dist,
         'gender_distribution': gender_counts,
-        'anon_count':        anon_count,
-        'public_count':      public_count,
+        'anon_count':          anon_count,
+        'public_count':        public_count,
     })
 
 
