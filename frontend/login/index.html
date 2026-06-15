@@ -2,9 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChomiHub – Get Started</title>
+
+  <meta name="description"
+        content="ChomiHub is a South African social platform featuring journals, reels, communities, messaging, research and business tools." />
+
+  <meta property="og:title" content="ChomiHub" />
+  <meta property="og:site_name" content="ChomiHub" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chomihub.co.za" />  
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="{% static 'login/css/login.css' %}" />
 </head>
 <body>
@@ -209,6 +218,16 @@
 </div>
 
 <script src="{% static 'login/js/login.js' %}"></script>
+
+ <script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Organization",
+  "name":"ChomiHub",
+  "url":"https://chomihub.co.za",
+  "logo":"https://chomihub.co.za/logo.png"
+}
+</script>
 
 <script>
   {% if show_auth %}
