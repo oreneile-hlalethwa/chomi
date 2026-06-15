@@ -12,9 +12,12 @@ function switchSection(id, btn) {
   closeSidebar();
 }
 
+let currentDays = 30;
 function setRange(days, btn) {
   document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  currentDays = days;
+  loadStats();
 }
 
 function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('mobileOverlay').classList.add('visible'); }
@@ -30,9 +33,9 @@ function closeSidebar() { document.getElementById('sidebar').classList.remove('o
     html.setAttribute('data-theme', dark ? 'dark' : 'light');
     sun.style.display  = dark ? 'none' : '';
     moon.style.display = dark ? '' : 'none';
-    localStorage.setItem('chomi-admin-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('chomi-theme', dark ? 'dark' : 'light');
   }
-  const saved = localStorage.getItem('chomi-admin-theme');
+  const saved = localStorage.getItem('chomi-theme');
   const hour  = new Date().getHours();
   setTheme(saved ? saved === 'dark' : hour >= 19 || hour < 7);
   btn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') !== 'dark'));
@@ -110,12 +113,25 @@ function renderBarChart(svg, data, labelKey, valueKey, W, H, pad, colorFn) {
 // ── LOAD STATS ──
 async function loadStats() {
   try {
-    const res  = await fetch('/api/admin/stats/');
+    const res  = await fetch(`/api/admin/stats/?days=${currentDays}`);
     const data = await res.json();
 
     document.getElementById('statTotalAccounts').textContent = data.total_accounts.toLocaleString();
     document.getElementById('statActiveUsers').textContent   = data.active_users.toLocaleString();
     document.getElementById('statTotalCheckins').textContent = data.total_checkins.toLocaleString();
+    document.getElementById('statAvgSession').textContent    = data.avg_session_mins + 'm';
+
+    // Real percentage changes
+    function setChange(id, text, isUp) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'stat-change ' + (isUp ? 'up' : 'down');
+      el.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="${isUp ? '18 15 12 9 6 15' : '18 9 12 15 6 9'}"/></svg>${text} vs prev period`;
+    }
+    setChange('statAccountsChange', data.accounts_change, data.accounts_up);
+    setChange('statActiveChange',   data.active_change,   data.active_up);
+    setChange('statCheckinsChange', data.checkins_change, data.checkins_up);
+    setChange('statSessionChange',  data.session_change,  data.session_up);
 
     // Mood distribution bars
     try {

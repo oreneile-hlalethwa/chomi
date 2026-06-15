@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const playPauseIndicators= Array.from(document.querySelectorAll('.play-pause-indicator'));
   const videoTimeDisplays  = Array.from(document.querySelectorAll('.video-time'));
   let currentReelIndex     = 0;
+  let globalMuted          = true; // tracks mute state across reels
+
+  // ── UNMUTE HINT (first reel only) ──
+  const unmuteHint = document.getElementById('unmuteHint');
+  if (unmuteHint) {
+    setTimeout(() => {
+      unmuteHint.classList.add('visible');
+      setTimeout(() => unmuteHint.classList.remove('visible'), 3000);
+    }, 1000);
+  }
 
   // ── HELPERS ──
   function formatTime(s) {
@@ -18,16 +28,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (video && el) el.textContent = `${formatTime(video.currentTime||0)} / ${formatTime(video.duration||0)}`;
   }
 
+  // ── UPDATE VOLUME BUTTON ICON ──
+  function updateVolBtn(btn, muted) {
+    if (!btn) return;
+    btn.innerHTML = muted
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+    if (muted) btn.classList.add('muted-state');
+    else btn.classList.remove('muted-state');
+  }
+
   // ── PLAY / PAUSE ──
   function playVideo(video, progressBar, timeDisplay, indicator) {
-    if (!video || !video.paused) return;
+    if (!video) return;
+    video.muted = globalMuted;
     video.play().catch(() => {});
     if (indicator) indicator.classList.remove('show');
-    const onUpdate = () => {
+    video.addEventListener('timeupdate', () => {
       if (video.duration && progressBar) progressBar.style.width = `${(video.currentTime/video.duration)*100}%`;
       if (timeDisplay) updateTimeDisplay(video, timeDisplay);
-    };
-    video.addEventListener('timeupdate', onUpdate);
+    });
     video.addEventListener('ended', () => { video.currentTime = 0; video.play(); });
   }
 
@@ -60,8 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isNaN(index)) {
           currentReelIndex = index;
           videos.forEach((video, i) => {
-            if (i === index) playVideo(video, progressBars[i], videoTimeDisplays[i], playPauseIndicators[i]);
-            else { pauseVideo(video, progressBars[i], videoTimeDisplays[i], playPauseIndicators[i]); if (progressBars[i]) progressBars[i].style.width = '0%'; }
+            if (i === index) {
+              video.muted = globalMuted;
+              updateVolBtn(volumeBtns[i], globalMuted);
+              playVideo(video, progressBars[i], videoTimeDisplays[i], playPauseIndicators[i]);
+            } else {
+              pauseVideo(video, progressBars[i], videoTimeDisplays[i], playPauseIndicators[i]);
+              if (progressBars[i]) progressBars[i].style.width = '0%';
+            }
           });
         }
       }
@@ -69,18 +95,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.6 });
 
   reels.forEach(reel => observer.observe(reel));
-  if (videos[0]) playVideo(videos[0], progressBars[0], videoTimeDisplays[0], playPauseIndicators[0]);
 
-  // ── VOLUME ──
+  // Play first video
+  if (videos[0]) {
+    videos[0].muted = true;
+    playVideo(videos[0], progressBars[0], videoTimeDisplays[0], playPauseIndicators[0]);
+  }
+
+  // ── VOLUME — global mute state ──
   volumeBtns.forEach((btn, i) => {
-    let muted = false;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      muted = !muted;
-      if (videos[i]) videos[i].muted = muted;
-      btn.innerHTML = muted
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M11 5L6 9H2v6h4l5 4z"/></svg>'
-        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+      globalMuted = !globalMuted;
+
+      // Apply to current video immediately
+      if (videos[i]) videos[i].muted = globalMuted;
+      updateVolBtn(btn, globalMuted);
+
+      // Hide unmute hint when user interacts
+      if (unmuteHint) unmuteHint.classList.remove('visible');
     });
   });
 

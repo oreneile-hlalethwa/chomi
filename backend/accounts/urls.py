@@ -36,4 +36,9 @@ urlpatterns = [
     path('api/admin/stats/',                  views.admin_stats,       name='admin_stats'),
     path('api/admin/users/',                  views.admin_users,       name='admin_users'),
     path('api/admin/users/<int:user_id>/verify/', views.admin_verify_user, name='admin_verify_user'),
+    path('journal/', views.journal_view, name='journal'),
+    path('api/journal/entries/', views.get_journal_entries),
+    path('api/journal/save/', views.save_journal_entry),
+    path('api/journal/prompt/', views.get_journal_prompt),
+    path('api/journal/<int:entry_id>/delete/', views.delete_journal_entry),
 ]

@@ -502,36 +502,92 @@ def admin_stats(request):
     if not request.user.is_staff:
         return JsonResponse({'error': 'Forbidden'}, status=403)
 
-    today = timezone.now().date()
+    # ── DATE RANGE from query param ──
+    days_param = int(request.GET.get('days', 30))
+    today      = timezone.now().date()
+    period_start     = today - timedelta(days=days_param)
+    prev_period_start = today - timedelta(days=days_param * 2)
+
     non_staff = User.objects.filter(is_staff=False)
 
-    total_accounts = non_staff.count()
-    active_users   = non_staff.filter(is_active=True).count()
-    total_checkins = MoodCheckIn.objects.count()
+    # ── CURRENT PERIOD COUNTS ──
+    total_accounts  = non_staff.count()
+    active_users    = non_staff.filter(is_active=True).count()
+    total_checkins  = MoodCheckIn.objects.count()
 
+    # Accounts in current vs previous period
+    accounts_curr = non_staff.filter(date_joined__date__gte=period_start).count()
+    accounts_prev = non_staff.filter(date_joined__date__gte=prev_period_start, date_joined__date__lt=period_start).count()
+
+    # Active users (checked in) current vs previous
+    active_curr = MoodCheckIn.objects.filter(timestamp__date__gte=period_start).values('user').distinct().count()
+    active_prev = MoodCheckIn.objects.filter(timestamp__date__gte=prev_period_start, timestamp__date__lt=period_start).values('user').distinct().count()
+
+    # Check-ins current vs previous
+    checkins_curr = MoodCheckIn.objects.filter(timestamp__date__gte=period_start).count()
+    checkins_prev = MoodCheckIn.objects.filter(timestamp__date__gte=prev_period_start, timestamp__date__lt=period_start).count()
+
+    # ── PERCENTAGE CHANGE HELPER ──
+    def pct_change(curr, prev):
+        if prev == 0:
+            return '+100%' if curr > 0 else '0%'
+        change = round(((curr - prev) / prev) * 100, 1)
+        return f'+{change}%' if change >= 0 else f'{change}%'
+
+    accounts_change  = pct_change(accounts_curr, accounts_prev)
+    active_change    = pct_change(active_curr, active_prev)
+    checkins_change  = pct_change(checkins_curr, checkins_prev)
+
+    # ── AVG SESSION TIME (real) ──
+    # Estimate from chat messages: avg messages per user per day * 2 min
+    msgs_period = ChatMessage.objects.filter(
+        timestamp__date__gte=period_start, sender='user'
+    )
+    total_msgs   = msgs_period.count()
+    active_days  = days_param
+    msgs_per_day = total_msgs / active_days if active_days > 0 else 0
+    avg_session_mins = round(msgs_per_day * 2)
+
+    # Previous period avg session
+    msgs_prev_period = ChatMessage.objects.filter(
+        timestamp__date__gte=prev_period_start,
+        timestamp__date__lt=period_start,
+        sender='user'
+    ).count()
+    prev_avg = round((msgs_prev_period / active_days) * 2) if active_days > 0 else 0
+    session_diff = avg_session_mins - prev_avg
+    session_change = f'+{session_diff} min' if session_diff >= 0 else f'{session_diff} min'
+
+    # ── MOOD DISTRIBUTION ──
     mood_dist = {}
     for mood, _ in MoodCheckIn.MOOD_CHOICES:
-        mood_dist[mood] = MoodCheckIn.objects.filter(mood=mood).count()
+        mood_dist[mood] = MoodCheckIn.objects.filter(
+            mood=mood, timestamp__date__gte=period_start
+        ).count()
 
+    # ── SIGNUPS OVER PERIOD ──
     signups = []
-    for i in range(29, -1, -1):
+    for i in range(days_param - 1, -1, -1):
         day   = today - timedelta(days=i)
         count = non_staff.filter(date_joined__date=day).count()
         signups.append({'label': day.strftime('%d %b'), 'count': count})
 
-    day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    # ── ACTIVE BY DAY OF WEEK ──
+    day_names     = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     active_by_day = [0] * 7
-    checkins_90 = MoodCheckIn.objects.filter(timestamp__gte=timezone.now() - timedelta(days=90))
-    for c in checkins_90:
+    checkins_period = MoodCheckIn.objects.filter(timestamp__date__gte=period_start)
+    for c in checkins_period:
         active_by_day[c.timestamp.weekday()] += 1
     active_by_day_data = [{'day': day_names[i], 'count': active_by_day[i]} for i in range(7)]
 
+    # ── SCREEN TIME LAST 7 DAYS ──
     screen_time = []
     for i in range(6, -1, -1):
         day   = today - timedelta(days=i)
         count = ChatMessage.objects.filter(timestamp__date=day, sender='user').count()
         screen_time.append({'day': day.strftime('%a'), 'mins': count * 2})
 
+    # ── NEW VS RETURNING ──
     new_vs_returning = []
     for i in range(5, -1, -1):
         month_start = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
@@ -542,6 +598,7 @@ def admin_stats(request):
         ).values('user').distinct().exclude(user__date_joined__date__gte=month_start).count()
         new_vs_returning.append({'label': month_start.strftime('%b'), 'new': new_users, 'returning': returning})
 
+    # ── RETENTION ──
     retention = []
     for i in range(11, -1, -1):
         week_start = today - timedelta(days=today.weekday() + i*7)
@@ -551,6 +608,7 @@ def admin_stats(request):
         rate = round((returned_next / users_that_week * 100) if users_that_week else 0)
         retention.append({'label': week_start.strftime('%d %b'), 'rate': rate})
 
+    # ── STREAK DISTRIBUTION ──
     streak_buckets = {'1 day': 0, '2-3': 0, '4-7': 0, '8-14': 0, '15-30': 0, '30+': 0}
     for u in non_staff:
         streak = 0
@@ -570,13 +628,18 @@ def admin_stats(request):
     total_with_streak = sum(streak_buckets.values()) or 1
     streak_dist = [{'label': k, 'pct': round(v / total_with_streak * 100)} for k, v in streak_buckets.items()]
 
-    support_visits = ChatMessage.objects.filter(message__icontains='support').values('user').distinct().count()
+    # ── SUPPORT VISITS ──
+    support_visits = ChatMessage.objects.filter(
+        message__icontains='support', timestamp__date__gte=period_start
+    ).values('user').distinct().count()
 
+    # ── RETENTION RATE ──
     week_ago        = today - timedelta(days=7)
     users_last_week = MoodCheckIn.objects.filter(timestamp__date__gte=week_ago).values('user').distinct().count()
     users_two_weeks = MoodCheckIn.objects.filter(timestamp__date__gte=today - timedelta(days=14), timestamp__date__lt=week_ago).values('user').distinct().count()
     retention_rate  = str(round((users_last_week / users_two_weeks * 100) if users_two_weeks else 0)) + '%'
 
+    # ── GENDER DISTRIBUTION ──
     gender_labels = {'female': 'Female', 'male': 'Male', 'non_binary': 'Non-binary', 'prefer_not': 'Prefer not to say', '': 'Not specified'}
     gender_counts = {}
     for code, label in gender_labels.items():
@@ -591,8 +654,19 @@ def admin_stats(request):
         'total_accounts':      total_accounts,
         'active_users':        active_users,
         'total_checkins':      total_checkins,
+        'avg_session_mins':    avg_session_mins,
         'support_visits':      support_visits,
         'retention_rate':      retention_rate,
+        # Real percentage changes
+        'accounts_change':     accounts_change,
+        'active_change':       active_change,
+        'checkins_change':     checkins_change,
+        'session_change':      session_change,
+        'accounts_up':         accounts_curr >= accounts_prev,
+        'active_up':           active_curr >= active_prev,
+        'checkins_up':         checkins_curr >= checkins_prev,
+        'session_up':          session_diff >= 0,
+        # Charts
         'mood_distribution':   mood_dist,
         'signups_over_time':   signups,
         'active_by_day':       active_by_day_data,
@@ -603,6 +677,7 @@ def admin_stats(request):
         'gender_distribution': gender_counts,
         'anon_count':          anon_count,
         'public_count':        public_count,
+        'days':                days_param,
     })
 
 
@@ -666,3 +741,119 @@ def admin_verify_user(request, user_id):
     u.is_verified = not u.is_verified
     u.save()
     return JsonResponse({'is_verified': u.is_verified})
+
+
+@login_required(login_url='login')
+def journal_view(request):
+    return render(request, 'enduser/journal.html', {'user': request.user})
+
+
+@login_required(login_url='login')
+def get_journal_entries(request):
+    entries = JournalEntry.objects.filter(user=request.user)[:30]
+    data = [{
+        'id':         e.id,
+        'content':    e.content,
+        'mood':       e.mood,
+        'prompt':     e.prompt,
+        'word_count': e.word_count,
+        'date':       e.created_at.strftime('%d %B %Y'),
+        'time':       e.created_at.strftime('%H:%M'),
+        'short_date': e.created_at.strftime('%d %b'),
+    } for e in entries]
+    return JsonResponse({'entries': data})
+
+
+@login_required(login_url='login')
+@require_POST
+@ratelimit(key='user', rate='20/m', block=True)
+def save_journal_entry(request):
+    data       = json.loads(request.body)
+    content    = data.get('content', '').strip()
+    entry_id   = data.get('id')
+
+    if not content:
+        return JsonResponse({'error': 'Content is required.'}, status=400)
+
+    word_count = len(content.split())
+    today   = timezone.now().date()
+    checkin = MoodCheckIn.objects.filter(user=request.user, timestamp__date=today).first()
+    mood    = checkin.mood if checkin else ''
+
+    if entry_id:
+        from django.shortcuts import get_object_or_404
+        entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+        entry.content    = content
+        entry.word_count = word_count
+        entry.save()
+    else:
+        entry = JournalEntry.objects.create(
+            user=request.user,
+            content=content,
+            mood=mood,
+            word_count=word_count,
+        )
+
+    return JsonResponse({
+        'status': 'ok',
+        'id':     entry.id,
+        'date':   entry.created_at.strftime('%d %B %Y'),
+    })
+
+
+@login_required(login_url='login')
+@require_POST
+def delete_journal_entry(request, entry_id):
+    from django.shortcuts import get_object_or_404
+    entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+    entry.delete()
+    return JsonResponse({'status': 'ok'})
+
+
+@login_required(login_url='login')
+def get_journal_prompt(request):
+    today   = timezone.now().date()
+    checkin = MoodCheckIn.objects.filter(user=request.user, timestamp__date=today).first()
+    mood    = checkin.mood if checkin else None
+
+    import random
+    prompts = {
+        'stressed': [
+            "What\'s been weighing on you the most today? Write it all out.",
+            "What would you tell a friend who was feeling exactly how you feel right now?",
+            "What\'s one small thing you can do tonight to feel a little lighter?",
+        ],
+        'sad': [
+            "What\'s making you feel sad today? You don\'t have to hold it in.",
+            "What\'s something that used to make you happy that you haven\'t done in a while?",
+            "Who is someone you trust that you could reach out to today?",
+        ],
+        'low': [
+            "What does \'low\' feel like for you today — in your body, your thoughts?",
+            "What\'s one thing, however small, that went okay today?",
+            "What would tomorrow look like if it was just 10% better than today?",
+        ],
+        'calm': [
+            "What\'s brought you peace today? Capture this feeling.",
+            "What are three things you\'re grateful for right now?",
+            "What does your ideal calm day look like?",
+        ],
+        'good': [
+            "What\'s making today feel good? Write it down so you can remember it.",
+            "What have you done recently that you\'re proud of?",
+            "What\'s something you\'re looking forward to?",
+        ],
+    }
+
+    if mood and mood in prompts:
+        prompt = random.choice(prompts[mood])
+    else:
+        general = [
+            "How are you really feeling today, beneath the surface?",
+            "What\'s on your mind that you haven\'t said out loud to anyone?",
+            "What does your ideal version of tomorrow look like?",
+            "What\'s one thing you want to remember about today?",
+        ]
+        prompt = random.choice(general)
+
+    return JsonResponse({'prompt': prompt, 'mood': mood})

@@ -10,9 +10,9 @@
     html.setAttribute('data-theme', dark ? 'dark' : 'light');
     if (sun)  sun.style.display  = dark ? 'none' : '';
     if (moon) moon.style.display = dark ? '' : 'none';
-    localStorage.setItem('chomi-dash-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('chomi-theme', dark ? 'dark' : 'light');
   }
-  const saved = localStorage.getItem('chomi-dash-theme');
+  const saved = localStorage.getItem('chomi-theme');
   const hour  = new Date().getHours();
   if (saved) setTheme(saved === 'dark');
   else setTheme(hour >= 19 || hour < 7);
@@ -51,10 +51,12 @@ function switchSection(id) {
 // ══════════════════════════════════════════
 // DATE RANGE
 // ══════════════════════════════════════════
+let currentDays = 30;
 function setRange(days, btn) {
   document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('customRangeBtn').classList.remove('active');
   btn.classList.add('active');
+  currentDays = days;
   updateTitle(days + ' days');
   loadDashboardData();
 }
@@ -135,7 +137,7 @@ function svgText(content, attrs, parent) {
 // ══════════════════════════════════════════
 async function loadDashboardData() {
   try {
-    const res  = await fetch('/api/admin/stats/');
+    const res  = await fetch(`/api/admin/stats/?days=${currentDays}`);
     const data = await res.json();
 
     // Stat cards

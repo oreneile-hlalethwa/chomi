@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chomi – Journal</title>
+  <link rel="stylesheet" href="{% static 'enduser/css/global.css' %}" />
+  <link rel="stylesheet" href="{% static 'enduser/css/journal.css' %}" />
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ── WRITE VIEW ── -->
+  <div class="journal-view" id="writeView">
+    <div class="journal-header">
+      <div class="journal-date" id="journalDate"></div>
+      <div class="journal-actions">
+        <button class="jbtn ghost" onclick="showEntries()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Entries
+        </button>
+      </div>
+    </div>
+
+    <div class="mood-badge-wrap" id="moodBadgeWrap"></div>
+
+    <div class="prompt-wrap" id="promptWrap">
+      <div class="prompt-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <p class="prompt-text" id="promptText">Loading your prompt...</p>
+      <button class="prompt-refresh" onclick="loadPrompt()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+
+    <textarea
+      class="journal-textarea"
+      id="journalTextarea"
+      placeholder="Start writing... this is your safe space."
+      oninput="updateWordCount()"
+    ></textarea>
+
+    <div class="journal-footer">
+      <span class="word-count" id="wordCount">0 words</span>
+      <div class="journal-footer-actions">
+        <button class="jbtn ghost" onclick="clearEntry()">Clear</button>
+        <button class="jbtn primary" onclick="saveEntry()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+      </div>
+    </div>
+
+    <div class="save-status" id="saveStatus"></div>
+  </div>
+
+  <!-- ── ENTRIES VIEW ── -->
+  <div class="journal-view hidden" id="entriesView">
+    <div class="journal-header">
+      <h2 class="entries-title">My Journal</h2>
+      <button class="jbtn primary small" onclick="showWrite()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Entry
+      </button>
+    </div>
+
+    <div class="streak-bar" id="streakBar"></div>
+
+    <div class="entries-list" id="entriesList">
+      <div class="entries-loading">Loading your entries...</div>
+    </div>
+  </div>
+
+  <!-- ── ENTRY DETAIL ── -->
+  <div class="journal-view hidden" id="detailView">
+    <div class="journal-header">
+      <button class="jbtn ghost small" onclick="showEntries()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <div class="detail-actions">
+        <button class="jbtn ghost small" id="editEntryBtn" onclick="editEntry()">Edit</button>
+        <button class="jbtn danger small" id="deleteEntryBtn">Delete</button>
+      </div>
+    </div>
+    <div class="detail-date" id="detailDate"></div>
+    <div class="detail-mood" id="detailMood"></div>
+    <div class="detail-content" id="detailContent"></div>
+    <div class="detail-words" id="detailWords"></div>
+  </div>
+
+</div>
+
+<script src="{% static 'enduser/js/nav.js' %}"></script>
+<script src="{% static 'enduser/js/journal.js' %}"></script>
+</body>
+</html>

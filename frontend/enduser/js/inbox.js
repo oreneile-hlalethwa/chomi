@@ -307,7 +307,20 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.value = ''; searchClear.style.display = 'none'; searchResults.style.display = 'none';
     activeMode = 'user'; activeUserId = user.id; activeConvoId = null;
     showChatWindow(user.name, user.is_anon ? 'Anonymous user' : 'Chomi member', getAvatarBg(user.id), user.initials, !user.is_anon);
-    chatMessages.innerHTML = ''; appendDateSep('Today');
+    chatMessages.innerHTML = '';
+
+    // Check if conversation already exists
+    try {
+      const res  = await fetch('/api/conversations/');
+      const data = await res.json();
+      const existing = data.conversations.find(c => c.other_id === user.id);
+      if (existing) {
+        activeConvoId = existing.id;
+        loadMessages(existing.id);
+      } else {
+        appendDateSep('Today');
+      }
+    } catch { appendDateSep('Today'); }
   }
 
   chatSendBtn.addEventListener('click', sendMessage);

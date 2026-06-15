@@ -9,10 +9,10 @@
     html.setAttribute('data-theme', dark ? 'dark' : 'light');
     sun.style.display  = dark ? 'none' : '';
     moon.style.display = dark ? '' : 'none';
-    localStorage.setItem('chomi-admin-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('chomi-theme', dark ? 'dark' : 'light');
   }
 
-  const saved = localStorage.getItem('chomi-admin-theme');
+  const saved = localStorage.getItem('chomi-theme');
   const hour  = new Date().getHours();
   setTheme(saved ? saved === 'dark' : hour >= 19 || hour < 7);
   btn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') !== 'dark'));

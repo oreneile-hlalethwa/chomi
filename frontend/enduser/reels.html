@@ -17,7 +17,7 @@
   <!-- Reel 1 -->
   <div class="reel" data-reel-index="0">
     <div class="video-wrapper">
-      <video preload="metadata" playsinline webkit-playsinline>
+      <video preload="auto" playsinline webkit-playsinline muted>
         <source src="{% static 'enduser/assets/mental-health-awareness.mp4' %}" type="video/mp4">
       </video>
       <div class="loading-indicator"></div>
@@ -26,6 +26,10 @@
         <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </div>
       <div class="video-time">0:00 / 0:00</div>
+      <div class="unmute-hint" id="unmuteHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 5L6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        Tap volume to unmute
+      </div>
     </div>
     <div class="reel-overlay">
       <div class="reel-info">
@@ -54,13 +58,15 @@
         </button>
       </div>
     </div>
-    <button class="volume-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+    <button class="volume-btn muted-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </button>
   </div>
 
   <!-- Reel 2 -->
   <div class="reel" data-reel-index="1">
     <div class="video-wrapper">
-      <video preload="metadata" playsinline webkit-playsinline>
+      <video preload="auto" playsinline webkit-playsinline muted>
         <source src="{% static 'enduser/assets/youtube-addiction.mp4' %}" type="video/mp4">
       </video>
       <div class="loading-indicator"></div>
@@ -97,13 +103,15 @@
         </button>
       </div>
     </div>
-    <button class="volume-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+    <button class="volume-btn muted-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </button>
   </div>
 
   <!-- Reel 3 -->
   <div class="reel" data-reel-index="2">
     <div class="video-wrapper">
-      <video preload="metadata" playsinline webkit-playsinline>
+      <video preload="auto" playsinline webkit-playsinline muted>
         <source src="{% static 'enduser/assets/we-all-have-mental-health.mp4' %}" type="video/mp4">
       </video>
       <div class="loading-indicator"></div>
@@ -140,13 +148,15 @@
         </button>
       </div>
     </div>
-    <button class="volume-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+    <button class="volume-btn muted-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </button>
   </div>
 
   <!-- Reel 4 -->
   <div class="reel" data-reel-index="3">
     <div class="video-wrapper">
-      <video preload="metadata" playsinline webkit-playsinline>
+      <video preload="auto" playsinline webkit-playsinline muted>
         <source src="{% static 'enduser/assets/main.mp4' %}" type="video/mp4">
       </video>
       <div class="loading-indicator"></div>
@@ -183,7 +193,9 @@
         </button>
       </div>
     </div>
-    <button class="volume-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+    <button class="volume-btn muted-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </button>
   </div>
 
 </div>
