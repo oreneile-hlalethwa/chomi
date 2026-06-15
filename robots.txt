@@ -1,0 +1,9 @@
+User-agent: *
+
+Allow: /
+
+Disallow: /dashboard/
+Disallow: /dashboard/admin/
+Disallow: /inbox/
+
+Sitemap: https://chomihub.co.za/sitemap.xml
