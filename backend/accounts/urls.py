@@ -41,4 +41,6 @@ urlpatterns = [
     path('api/journal/save/', views.save_journal_entry),
     path('api/journal/prompt/', views.get_journal_prompt),
     path('api/journal/<int:entry_id>/delete/', views.delete_journal_entry),
+    path('api/admin/export/users/',    views.export_admin_csv,    name='export_admin_csv'),
+    path('api/admin/export/research/', views.export_research_csv, name='export_research_csv'),
 ]

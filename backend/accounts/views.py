@@ -1,4 +1,6 @@
 import os
+import csv
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -857,3 +859,110 @@ def get_journal_prompt(request):
         prompt = random.choice(general)
 
     return JsonResponse({'prompt': prompt, 'mood': mood})
+
+@login_required(login_url='login')
+def export_admin_csv(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="chomi_users_export.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['First Name', 'Last Name', 'Email', 'Gender', 'Date Joined', 'Is Active', 'Is Anonymous', 'Is Verified', 'Total Check-ins', 'Streak', 'Last Active'])
+
+    today     = timezone.now().date()
+    non_staff = User.objects.filter(is_staff=False).order_by('-date_joined')
+
+    for u in non_staff:
+        checkins     = MoodCheckIn.objects.filter(user=u).count()
+        last_checkin = MoodCheckIn.objects.filter(user=u).first()
+
+        streak = 0
+        for i in range(30):
+            day = today - timedelta(days=i)
+            if MoodCheckIn.objects.filter(user=u, timestamp__date=day).exists():
+                streak += 1
+            else:
+                break
+
+        if last_checkin:
+            delta = (today - last_checkin.timestamp.date()).days
+            if delta == 0:   last_active = 'Today'
+            elif delta == 1: last_active = 'Yesterday'
+            else:            last_active = f'{delta} days ago'
+        else:
+            last_active = 'Never'
+
+        writer.writerow([
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.get_gender_display() if u.gender else 'Not specified',
+            u.date_joined.strftime('%Y-%m-%d'),
+            'Yes' if u.is_active else 'No',
+            'Yes' if u.is_anonymous else 'No',
+            'Yes' if u.is_verified else 'No',
+            checkins,
+            streak,
+            last_active,
+        ])
+
+    return response
+
+
+@login_required(login_url='login')
+def export_research_csv(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="chomi_research_export.csv"'
+
+    writer = csv.writer(response)
+
+    # Section 1: Mood Check-ins
+    writer.writerow(['--- MOOD CHECK-INS ---'])
+    writer.writerow(['Date', 'Mood', 'Mood Score', 'Topics'])
+    checkins = MoodCheckIn.objects.all().order_by('-timestamp')
+    for c in checkins:
+        writer.writerow([
+            c.timestamp.strftime('%Y-%m-%d'),
+            c.mood,
+            c.mood_score,
+            ', '.join(c.topics) if isinstance(c.topics, list) else c.topics,
+        ])
+
+    writer.writerow([])
+
+    # Section 2: Signups over time
+    writer.writerow(['--- SIGNUPS OVER TIME ---'])
+    writer.writerow(['Date', 'New Signups'])
+    today     = timezone.now().date()
+    non_staff = User.objects.filter(is_staff=False)
+    for i in range(29, -1, -1):
+        day   = today - timedelta(days=i)
+        count = non_staff.filter(date_joined__date=day).count()
+        writer.writerow([day.strftime('%Y-%m-%d'), count])
+
+    writer.writerow([])
+
+    # Section 3: Mood distribution
+    writer.writerow(['--- MOOD DISTRIBUTION ---'])
+    writer.writerow(['Mood', 'Count'])
+    for mood, _ in MoodCheckIn.MOOD_CHOICES:
+        count = MoodCheckIn.objects.filter(mood=mood).count()
+        writer.writerow([mood, count])
+
+    writer.writerow([])
+
+    # Section 4: Gender distribution
+    writer.writerow(['--- GENDER DISTRIBUTION ---'])
+    writer.writerow(['Gender', 'Count'])
+    gender_labels = {'female': 'Female', 'male': 'Male', 'non_binary': 'Non-binary', 'prefer_not': 'Prefer not to say', '': 'Not specified'}
+    for code, label in gender_labels.items():
+        count = non_staff.filter(gender=code).count()
+        if count > 0:
+            writer.writerow([label, count])
+
+    return response
