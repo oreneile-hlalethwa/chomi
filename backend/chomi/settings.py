@@ -101,6 +101,11 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
+# ── SESSION ──
+SESSION_COOKIE_AGE          = 14400
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST  = True
+
 # ── SECURITY (production only) ──
 if not DEBUG:
     SECURE_SSL_REDIRECT          = True
