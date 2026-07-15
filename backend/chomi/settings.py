@@ -106,6 +106,9 @@ SESSION_COOKIE_AGE          = 14400
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST  = True
 
+# ── CUSTOM ERROR PAGES ──
+CSRF_FAILURE_VIEW = 'accounts.views.csrf_failure_view'
+
 # ── SECURITY (production only) ──
 if not DEBUG:
     SECURE_SSL_REDIRECT          = True

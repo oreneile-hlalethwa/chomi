@@ -19,6 +19,18 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db import models
 
+def csrf_failure_view(request, reason=''):
+    # Auto refresh once, show message if still failing
+    retry = request.COOKIES.get('csrf_retry')
+    if not retry:
+        response = render(request, '403.html', status=403)
+        response.set_cookie('csrf_retry', '1', max_age=30)
+        response['Refresh'] = '0'  # auto refresh immediately
+        return response
+    else:
+        response = render(request, '403.html', status=403)
+        response.delete_cookie('csrf_retry')
+        return response
 
 # ── RATE LIMIT HELPER ──
 def rate_limited_response(request, group=None, key=None):
